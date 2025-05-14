@@ -22,7 +22,7 @@ function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const navItems = ['Home', 'Discover', 'Login'];
+  const navItems = ['Home', 'Discover'];
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

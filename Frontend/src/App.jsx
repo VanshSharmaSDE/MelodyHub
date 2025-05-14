@@ -1,21 +1,21 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline, Box } from '@mui/material';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import theme from './theme/theme';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Feature';
-import Footer from './components/Footer';
-import Login from './components/LoginPage';
-import HomePage from './Pages/HomePage';
-import Player from './components/Player';
-import Discover from './components/DiscoverPage';
+import Login from './Pages/Auth/Login';
+import Signup from './Pages/Auth/Signup';
+import ForgotPassword from './Pages/Auth/ForgotPassword';
+import HomePage from './Pages/Home/HomePage';
+import Player from './Pages/Acessability/Player';
+import Discover from './Pages/Acessability/Discover';
 import UserDashboard from './DashBoard/UserDashBoard/UserDashBoardPage';
 import AdminDashboard from './DashBoard/AdminDasBoard/AdminDashBoardPage';
+import NotFound from './Pages/NotFound/404';
+import UnderDevelopment from './Pages/NotFound/UnderDevelopment';
 
 function App() {
   return (
-  <BrowserRouter>
+    <BrowserRouter>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -24,11 +24,14 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/player" element={<Player/>} />
               <Route path="/discover" element={<Discover />} />
               <Route path="/userdashboard" element={<UserDashboard />} />
               <Route path="/admindashboard" element={<AdminDashboard />} />
-              <Route path="*" element={<Navigate to="/" />} />
+              <Route path="/under-development" element={<UnderDevelopment />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Box>
     
