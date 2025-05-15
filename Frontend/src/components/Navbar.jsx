@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AppBar, 
-  Box, 
-  Toolbar, 
-  Typography, 
-  Button, 
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Typography,
+  Button,
   IconButton,
   Drawer,
   List,
@@ -36,17 +36,17 @@ function Navbar() {
       setLoggedIn(authStatus);
       setIsAdminUser(isAdmin());
     };
-    
+
     checkAuth();
-    
+
     // You could add an event listener for storage changes if needed
     // to handle login/logout in other tabs
     const handleStorageChange = () => {
       checkAuth();
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -55,7 +55,7 @@ function Navbar() {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  
+
   const handleDashboardClick = () => {
     if (isAdminUser) {
       navigate('/admin/dashboard');
@@ -63,7 +63,7 @@ function Navbar() {
       navigate('/user/dashboard');
     }
   };
-  
+
   const handleLogout = () => {
     clearAuth();
     setLoggedIn(false);
@@ -72,25 +72,24 @@ function Navbar() {
   };
 
   return (
-    <AppBar 
-      position="sticky" 
+    <AppBar
+      position="sticky"
       elevation={0}
-      sx={{ 
-        backgroundColor: 'rgba(18, 18, 18, 0.9)', 
+      sx={{
+        backgroundColor: 'rgba(18, 18, 18, 0.9)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
       }}
     >
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ height: 80 }}>
-          <Typography 
-            variant="h6" 
+          <Typography
+            variant="h6"
             component="div"
             sx={{
-              flexGrow: 1, 
+              flexGrow: 1,
               fontWeight: 800,
               fontSize: { xs: '1.8rem', md: '2rem' },
-              color: '#1DB954',
               letterSpacing: '1px',
               animation: 'fadeIn 0.6s ease-in',
               '@keyframes fadeIn': {
@@ -99,7 +98,8 @@ function Navbar() {
               }
             }}
           >
-            MUSICIFY
+            MELODY<span style={{ color: '#1DB954' }}>HUB</span>
+
           </Typography>
 
           {isMobile ? (
@@ -119,8 +119,8 @@ function Navbar() {
               <MenuIcon sx={{ fontSize: '2rem' }} />
             </IconButton>
           ) : (
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               gap: 2,
               animation: 'fadeIn 0.6s ease-in',
               '@keyframes fadeIn': {
@@ -129,18 +129,18 @@ function Navbar() {
               }
             }}>
               {navItems.map((item) => (
-                <Link 
-                  key={item} 
+                <Link
+                  key={item}
                   to={`/${item.toLowerCase()}`}
                   style={{ textDecoration: 'none' }}
                 >
-                  <Button 
-                    sx={{ 
-                      color: '#B3B3B3', 
+                  <Button
+                    sx={{
+                      color: '#B3B3B3',
                       fontSize: '1.1rem',
                       padding: '8px 16px',
                       transition: 'all 0.2s ease',
-                      '&:hover': { 
+                      '&:hover': {
                         color: '#1DB954',
                         transform: 'translateY(-2px)'
                       }
@@ -153,15 +153,15 @@ function Navbar() {
 
               {/* Dashboard button - only visible when logged in */}
               {loggedIn && (
-                <Button 
+                <Button
                   startIcon={<DashboardIcon />}
                   onClick={handleDashboardClick}
-                  sx={{ 
-                    color: '#1DB954', 
+                  sx={{
+                    color: '#1DB954',
                     fontSize: '1.1rem',
                     padding: '8px 16px',
                     transition: 'all 0.2s ease',
-                    '&:hover': { 
+                    '&:hover': {
                       color: '#fff',
                       transform: 'translateY(-2px)'
                     }
@@ -172,11 +172,11 @@ function Navbar() {
               )}
 
               {loggedIn ? (
-                <Button 
-                  variant="outlined" 
+                <Button
+                  variant="outlined"
                   color="error"
                   onClick={handleLogout}
-                  sx={{ 
+                  sx={{
                     ml: 1,
                     fontWeight: 600,
                     transition: 'all 0.3s ease',
@@ -188,11 +188,11 @@ function Navbar() {
                   Logout
                 </Button>
               ) : (
-                <Link to="/login" style={{ textDecoration: 'none' }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    sx={{ 
+                <Link to="/signup" style={{ textDecoration: 'none' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{
                       ml: 1,
                       fontWeight: 700,
                       boxShadow: '0 4px 12px rgba(29, 185, 84, 0.5)',
@@ -203,7 +203,7 @@ function Navbar() {
                       }
                     }}
                   >
-                    Try Premium
+                    Sign up
                   </Button>
                 </Link>
               )}
@@ -218,7 +218,7 @@ function Navbar() {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         sx={{
-          '& .MuiDrawer-paper': { 
+          '& .MuiDrawer-paper': {
             width: 280,
             bgcolor: '#121212',
             borderLeft: '1px solid rgba(255, 255, 255, 0.1)'
@@ -226,22 +226,22 @@ function Navbar() {
         }}
       >
         <Box sx={{ p: 2, textAlign: 'center' }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 800, 
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 800,
               color: '#1DB954',
               fontSize: '1.8rem',
               my: 2
             }}
           >
-            MUSICIFY
+            MelodyHub
           </Typography>
 
           <List sx={{ mt: 4 }}>
             {navItems.map((item) => (
-              <ListItem 
-                button 
+              <ListItem
+                button
                 key={item}
                 component={Link}
                 to={`/${item.toLowerCase()}`}
@@ -254,21 +254,21 @@ function Navbar() {
                   }
                 }}
               >
-                <ListItemText 
-                  primary={item} 
-                  primaryTypographyProps={{ 
-                    fontSize: '1.2rem', 
+                <ListItemText
+                  primary={item}
+                  primaryTypographyProps={{
+                    fontSize: '1.2rem',
                     align: 'center',
                     fontWeight: 500
-                  }} 
+                  }}
                 />
               </ListItem>
             ))}
 
             {/* Dashboard button in mobile menu - only visible when logged in */}
             {loggedIn && (
-              <ListItem 
-                button 
+              <ListItem
+                button
                 onClick={handleDashboardClick}
                 sx={{
                   borderRadius: 2,
@@ -280,25 +280,25 @@ function Navbar() {
                   }
                 }}
               >
-                <ListItemText 
-                  primary="Dashboard" 
-                  primaryTypographyProps={{ 
-                    fontSize: '1.2rem', 
+                <ListItemText
+                  primary="Dashboard"
+                  primaryTypographyProps={{
+                    fontSize: '1.2rem',
                     align: 'center',
                     fontWeight: 700,
                     color: '#1DB954'
-                  }} 
+                  }}
                 />
               </ListItem>
             )}
 
             {loggedIn ? (
-              <Button 
-                variant="outlined" 
-                color="error" 
-                fullWidth 
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
                 onClick={handleLogout}
-                sx={{ 
+                sx={{
                   mt: 3,
                   py: 1.5,
                   fontSize: '1.1rem'
@@ -307,13 +307,13 @@ function Navbar() {
                 Logout
               </Button>
             ) : (
-              <Button 
-                variant="contained" 
-                color="primary" 
+              <Button
+                variant="contained"
+                color="primary"
                 fullWidth
                 component={Link}
-                to="/login" 
-                sx={{ 
+                to="/login"
+                sx={{
                   mt: 3,
                   py: 1.5,
                   fontSize: '1.1rem'

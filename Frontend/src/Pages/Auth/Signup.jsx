@@ -202,7 +202,7 @@ function Signup() {
                     textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                   }}
                 >
-                  MUSIC<span style={{ color: '#1DB954' }}>IFY</span>
+                  MELODY<span style={{ color: '#1DB954' }}>HUB</span>
                 </Typography>
               </Box>
 
@@ -211,7 +211,7 @@ function Signup() {
               </Typography>
 
               <Typography variant="body1" sx={{ mb: 4, textAlign: 'center', color: '#b3b3b3' }}>
-                Join Musicify to start streaming your favorite songs
+                Join MelodyHub to start streaming your favorite songs
               </Typography>
 
               {error && (

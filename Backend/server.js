@@ -21,7 +21,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 
@@ -52,7 +52,7 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/musicify';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://hubmelody1:dh6E4asbRVyzj2qI@cluster0.uejjx3l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/musicify';
 
 mongoose.connect(MONGODB_URI)
   .then(() => {

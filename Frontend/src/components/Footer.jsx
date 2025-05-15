@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Grid, 
-  Typography, 
-  Link, 
-  IconButton, 
-  TextField, 
-  Button, 
-  Divider, 
-  useTheme, 
+import {
+  Box,
+  Container,
+  Grid,
+  Typography,
+  Link,
+  IconButton,
+  TextField,
+  Button,
+  Divider,
+  useTheme,
   useMediaQuery,
   Collapse,
   Paper
@@ -39,7 +39,7 @@ function Footer() {
     company: !isMobile,
     legal: !isMobile
   });
-  
+
   const toggleSection = (section) => {
     if (isMobile) {
       setExpandedSection(prev => ({
@@ -48,25 +48,25 @@ function Footer() {
       }));
     }
   };
-  
+
   const handleNavigation = (path) => {
     navigate(path);
   };
-  
+
   const handleSubscribe = (e) => {
     e.preventDefault();
     // Subscription logic would go here
     alert(`Thanks for subscribing with ${email}!`);
     setEmail('');
   };
-  
+
   const currentYear = new Date().getFullYear();
 
   return (
-    <Box 
+    <Box
       component="footer"
-      sx={{ 
-        bgcolor: '#080808', 
+      sx={{
+        bgcolor: '#080808',
         py: { xs: 6, md: 8 },
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         position: 'relative',
@@ -103,23 +103,23 @@ function Footer() {
               {/* Logo and Description */}
               <Grid item xs={12} md={6}>
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    mb: 2 
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 2
                   }}>
-                    <MusicNoteIcon 
-                      sx={{ 
-                        color: '#1DB954', 
-                        fontSize: '2.5rem', 
+                    <MusicNoteIcon
+                      sx={{
+                        color: '#1DB954',
+                        fontSize: '2.5rem',
                         mr: 1,
                         filter: 'drop-shadow(0 0 8px rgba(29, 185, 84, 0.3))'
                       }}
                     />
-                    <Typography 
-                      variant="h6" 
+                    <Typography
+                      variant="h6"
                       component="div"
-                      sx={{ 
+                      sx={{
                         fontWeight: 800,
                         fontSize: { xs: '1.8rem', md: '2rem' },
                         color: 'white',
@@ -127,13 +127,13 @@ function Footer() {
                         textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                       }}
                     >
-                      MUSIC<span style={{ color: '#1DB954' }}>IFY</span>
+                      MELODY<span style={{ color: '#1DB954' }}>HUB</span>
                     </Typography>
                   </Box>
-                  
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
+
+                  <Typography
+                    variant="body1"
+                    sx={{
                       color: '#B3B3B3',
                       mb: 4,
                       fontSize: { xs: '1rem', md: '1.1rem' },
@@ -143,23 +143,23 @@ function Footer() {
                   >
                     Your ultimate destination for music discovery and enjoyment. Stream millions of songs, create personalized playlists, and connect with artists worldwide.
                   </Typography>
-                  
+
                   {/* Social Media Links */}
                   <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
                     {[
                       { icon: <FacebookIcon />, name: 'Facebook' },
                       { icon: <InstagramIcon />, name: 'Instagram' },
-                      { icon: <TwitterIcon />, name: 'Twitter' }, 
+                      { icon: <TwitterIcon />, name: 'Twitter' },
                       { icon: <YouTubeIcon />, name: 'YouTube' }
                     ].map((social, i) => (
-                      <IconButton 
-                        key={i} 
+                      <IconButton
+                        key={i}
                         aria-label={`Follow us on ${social.name}`}
-                        sx={{ 
+                        sx={{
                           color: 'white',
                           bgcolor: 'rgba(255, 255, 255, 0.07)',
                           transition: 'all 0.3s ease',
-                          '&:hover': { 
+                          '&:hover': {
                             bgcolor: '#1DB954',
                             transform: 'translateY(-5px)',
                             boxShadow: '0 5px 15px rgba(29, 185, 84, 0.3)'
@@ -176,11 +176,11 @@ function Footer() {
               <Grid item xs={12} md={6}>
                 {/* Download App */}
                 <Box sx={{ mb: 4, mt: { xs: 0, md: 2 } }}>
-                  <Typography 
+                  <Typography
                     variant="subtitle1"
-                    sx={{ 
-                      fontWeight: 600, 
-                      mb: 2, 
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
                       color: 'white',
                       fontSize: '1.1rem',
                       position: 'relative',
@@ -199,7 +199,7 @@ function Footer() {
                   >
                     Download Our App
                   </Typography>
-                  
+
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                     {[
                       { icon: <AppleIcon />, text: 'iOS App' },
@@ -229,11 +229,11 @@ function Footer() {
 
                 {/* Customer Support */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography 
-                    variant="subtitle1" 
-                    sx={{ 
-                      fontWeight: 600, 
-                      mb: 2, 
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
                       color: 'white',
                       fontSize: '1.1rem',
                       position: 'relative',
@@ -252,7 +252,7 @@ function Footer() {
                   >
                     Need Help?
                   </Typography>
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <HeadphonesIcon sx={{ color: '#1DB954', mr: 1, fontSize: '1.2rem' }} />
                     <Link
@@ -276,21 +276,21 @@ function Footer() {
               {/* Links Sections */}
               <Grid item xs={12} sm={6}>
                 <Box sx={{ mb: { xs: 1, md: 3 } }}>
-                  <Box 
+                  <Box
                     onClick={() => toggleSection('links')}
-                    sx={{ 
-                      display: 'flex', 
+                    sx={{
+                      display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: isMobile ? 'pointer' : 'default',
-                      '&:hover': isMobile ? { 
-                        '& .MuiTypography-root': { color: '#1DB954' } 
+                      '&:hover': isMobile ? {
+                        '& .MuiTypography-root': { color: '#1DB954' }
                       } : {},
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
+                    <Typography
+                      variant="h6"
+                      sx={{
                         fontSize: { xs: '1.2rem', md: '1.3rem' },
                         fontWeight: 700,
                         mb: isMobile ? 1 : 3,
@@ -311,18 +311,18 @@ function Footer() {
                     >
                       Explore
                     </Typography>
-                    
+
                     {isMobile && (
-                      expandedSection.links ? 
-                        <KeyboardArrowUpIcon sx={{ color: '#1DB954' }}/> : 
-                        <KeyboardArrowDownIcon sx={{ color: '#B3B3B3' }}/>
+                      expandedSection.links ?
+                        <KeyboardArrowUpIcon sx={{ color: '#1DB954' }} /> :
+                        <KeyboardArrowDownIcon sx={{ color: '#B3B3B3' }} />
                     )}
                   </Box>
-                  
+
                   <Collapse in={expandedSection.links}>
-                    <Box 
-                      component="ul" 
-                      sx={{ 
+                    <Box
+                      component="ul"
+                      sx={{
                         listStyle: 'none',
                         p: 0,
                         m: 0
@@ -335,21 +335,21 @@ function Footer() {
                         { name: 'Charts', path: '/charts' },
                         { name: 'Genres', path: '/genres' }
                       ].map((item) => (
-                        <Box 
-                          component="li" 
-                          key={item.name} 
+                        <Box
+                          component="li"
+                          key={item.name}
                           sx={{ mb: 2 }}
                         >
-                          <Link 
+                          <Link
                             component="button"
                             onClick={() => handleNavigation(item.path)}
-                            underline="none" 
-                            sx={{ 
+                            underline="none"
+                            sx={{
                               color: '#B3B3B3',
                               fontSize: '1rem',
                               display: 'inline-block',
                               transition: 'all 0.2s',
-                              '&:hover': { 
+                              '&:hover': {
                                 color: '#1DB954',
                                 transform: 'translateX(5px)'
                               }
@@ -363,25 +363,25 @@ function Footer() {
                   </Collapse>
                 </Box>
               </Grid>
-              
+
               {/* Company */}
               <Grid item xs={12} sm={6}>
                 <Box sx={{ mb: { xs: 1, md: 3 } }}>
-                  <Box 
+                  <Box
                     onClick={() => toggleSection('company')}
-                    sx={{ 
-                      display: 'flex', 
+                    sx={{
+                      display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: isMobile ? 'pointer' : 'default',
-                      '&:hover': isMobile ? { 
-                        '& .MuiTypography-root': { color: '#1DB954' } 
+                      '&:hover': isMobile ? {
+                        '& .MuiTypography-root': { color: '#1DB954' }
                       } : {},
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
+                    <Typography
+                      variant="h6"
+                      sx={{
                         fontSize: { xs: '1.2rem', md: '1.3rem' },
                         fontWeight: 700,
                         mb: isMobile ? 1 : 3,
@@ -402,18 +402,18 @@ function Footer() {
                     >
                       Company
                     </Typography>
-                    
+
                     {isMobile && (
-                      expandedSection.company ? 
-                        <KeyboardArrowUpIcon sx={{ color: '#1DB954' }}/> : 
-                        <KeyboardArrowDownIcon sx={{ color: '#B3B3B3' }}/>
+                      expandedSection.company ?
+                        <KeyboardArrowUpIcon sx={{ color: '#1DB954' }} /> :
+                        <KeyboardArrowDownIcon sx={{ color: '#B3B3B3' }} />
                     )}
                   </Box>
-                  
+
                   <Collapse in={expandedSection.company}>
-                    <Box 
-                      component="ul" 
-                      sx={{ 
+                    <Box
+                      component="ul"
+                      sx={{
                         listStyle: 'none',
                         p: 0,
                         m: 0
@@ -426,21 +426,21 @@ function Footer() {
                         { name: 'Newsroom', path: '/news' },
                         { name: 'Partners', path: '/partners' }
                       ].map((item) => (
-                        <Box 
-                          component="li" 
-                          key={item.name} 
+                        <Box
+                          component="li"
+                          key={item.name}
                           sx={{ mb: 2 }}
                         >
-                          <Link 
+                          <Link
                             component="button"
                             onClick={() => handleNavigation(item.path)}
-                            underline="none" 
-                            sx={{ 
+                            underline="none"
+                            sx={{
                               color: '#B3B3B3',
                               fontSize: '1rem',
                               display: 'inline-block',
                               transition: 'all 0.2s',
-                              '&:hover': { 
+                              '&:hover': {
                                 color: '#1DB954',
                                 transform: 'translateX(5px)'
                               }
@@ -456,12 +456,12 @@ function Footer() {
               </Grid>
             </Grid>
           </Grid>
-          
+
           {/* Newsletter Section - Right Side */}
           <Grid item xs={12} md={4} width={'100%'} display="flex" justifyContent="center">
-            <Paper 
+            <Paper
               elevation={0}
-              sx={{ 
+              sx={{
                 bgcolor: 'rgba(255,255,255,0.03)',
                 p: { xs: 3, md: 4 },
                 borderRadius: 3,
@@ -480,8 +480,8 @@ function Footer() {
                 }
               }}
             >
-              <EmailIcon 
-                sx={{ 
+              <EmailIcon
+                sx={{
                   position: 'absolute',
                   bottom: -20,
                   right: -20,
@@ -491,11 +491,11 @@ function Footer() {
                   zIndex: 0
                 }}
               />
-              
+
               <Box sx={{ position: 'relative', zIndex: 1 }}>
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
+                <Typography
+                  variant="h5"
+                  sx={{
                     fontSize: { xs: '1.4rem', md: '1.5rem' },
                     fontWeight: 700,
                     mb: 1,
@@ -504,11 +504,11 @@ function Footer() {
                 >
                   Join Our Newsletter
                 </Typography>
-                
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    color: '#B3B3B3', 
+
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: '#B3B3B3',
                     mb: 3,
                     fontSize: '0.95rem',
                     lineHeight: 1.6
@@ -516,11 +516,11 @@ function Footer() {
                 >
                   Subscribe for exclusive updates, new releases, and personalized music recommendations delivered directly to your inbox.
                 </Typography>
-                
-                <Box 
-                  component="form" 
+
+                <Box
+                  component="form"
                   onSubmit={handleSubscribe}
-                  sx={{ 
+                  sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
@@ -539,7 +539,7 @@ function Footer() {
                       sx: {
                         bgcolor: 'rgba(255,255,255,0.05)',
                         borderRadius: '8px',
-                        '& input': { 
+                        '& input': {
                           color: 'white',
                           p: '12px 14px',
                           '&::placeholder': {
@@ -547,7 +547,7 @@ function Footer() {
                             opacity: 1
                           }
                         },
-                        '& fieldset': { 
+                        '& fieldset': {
                           border: '1px solid rgba(255,255,255,0.1)',
                           '&:hover': {
                             borderColor: 'rgba(255,255,255,0.3)'
@@ -559,7 +559,7 @@ function Footer() {
                       }
                     }}
                   />
-                  
+
                   <Button
                     variant="contained"
                     type="submit"
@@ -584,10 +584,10 @@ function Footer() {
                     Subscribe Now
                   </Button>
                 </Box>
-                
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
+
+                <Typography
+                  variant="caption"
+                  sx={{
                     display: 'block',
                     color: 'rgba(255,255,255,0.4)',
                     fontSize: '0.75rem',
@@ -600,32 +600,32 @@ function Footer() {
             </Paper>
           </Grid>
         </Grid>
-        
+
         {/* Legal and Copyright Section */}
         <Box sx={{ mt: { xs: 5, md: 7 } }}>
           <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.05)', mb: 4 }} />
-          
-          <Box 
-            sx={{ 
+
+          <Box
+            sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
             }}
           >
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 color: 'rgba(255, 255, 255, 0.5)',
                 fontSize: '0.9rem',
                 mb: { xs: 3, md: 0 }
               }}
             >
-              © {currentYear} Musicify. All rights reserved.
+              © {currentYear} MelodyHub. All rights reserved.
             </Typography>
-            
-            <Box 
-              sx={{ 
+
+            <Box
+              sx={{
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
                 gap: { xs: 1.5, sm: 4 }
@@ -634,15 +634,13 @@ function Footer() {
               {[
                 { name: 'Privacy Policy', path: '/privacy' },
                 { name: 'Terms of Use', path: '/terms' },
-                { name: 'Cookies', path: '/cookies' },
-                { name: 'Accessibility', path: '/accessibility' }
               ].map((item) => (
-                <Link 
-                  key={item.name} 
-                  component="button" 
+                <Link
+                  key={item.name}
+                  component="button"
                   onClick={() => handleNavigation(item.path)}
-                  underline="none" 
-                  sx={{ 
+                  underline="none"
+                  sx={{
                     color: 'rgba(255, 255, 255, 0.5)',
                     fontSize: '0.9rem',
                     transition: 'color 0.2s',

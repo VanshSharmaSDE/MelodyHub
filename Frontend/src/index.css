@@ -32,3 +32,34 @@ code {
 html {
   scroll-behavior: smooth;
 }
+
+/* Custom Scrollbar Styling for Musicify Theme with #1DB954 accent color */
+::-webkit-scrollbar {
+  width: 8px;               /* Width of the vertical scrollbar */
+  height: 8px;              /* Height of the horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #121212;      /* Dark background matching your app theme */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(29, 185, 84, 0.5);  /* Semi-transparent green matching #1DB954 */
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1DB954;      /* Full opacity green on hover */
+}
+
+::-webkit-scrollbar-corner {
+  background: #121212;      /* Corner color */
+}
+
+/* Firefox scrollbar (optional) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(29, 185, 84, 0.5) #121212;
+}
