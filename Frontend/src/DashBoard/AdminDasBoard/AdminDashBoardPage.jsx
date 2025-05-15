@@ -1,705 +1,932 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  CssBaseline,
-  Drawer,
-  AppBar,
-  Toolbar,
-  List,
-  Typography,
-  Divider,
-  IconButton,
   Container,
+  Typography,
   Grid,
   Paper,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Avatar,
-  Menu,
-  MenuItem,
-  Badge,
-  ThemeProvider,
-  createTheme,
-  useMediaQuery,
-  Collapse,
   Tabs,
   Tab,
-  Alert,
-  Snackbar,
   Button,
-  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  CircularProgress,
+  AppBar,
+  Toolbar,
+  Divider,
+  Card,
+  CardContent,
+  CardMedia,
+  Avatar,
+  Chip,
+  Tooltip,
+  Stack,
+  useTheme
 } from '@mui/material';
-
-// Icons
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import AlbumIcon from '@mui/icons-material/Album';
-import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
-import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import LogoutIcon from '@mui/icons-material/Logout';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import CategoryIcon from '@mui/icons-material/Category';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import QueueMusicIcon from '@mui/icons-material/QueueMusic';
-import PaymentIcon from '@mui/icons-material/Payment';
-import ReportIcon from '@mui/icons-material/Report';
-
-// Dashboard Components
-import Dashboard from './Pages/DashBoard';
-import UserManagement from './Pages/UserManagement';
-import ArtistManagement from './Pages/ArtistManagement';
-import AlbumManagement from './Pages/AlbumManagement';
-import TrackManagement from './Pages/TrackManagement';
-import PlaylistManagement from './Pages/PlaylistManagement';
-import GenreManagement from './Pages/GenreManagement';
-import ReportManagement from './Pages/ReportManagement';
-// import AnalyticsView from './Pages/AnalyticsView';
-import PaymentManagement from './Pages/PaymentManagement';
-import AnalyticsView from './Pages/AnalyticsView';
-// import Settings from './Pages/Settings';
-
-const drawerWidth = 260;
-
-// Create a dark theme for the admin dashboard
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#1DB954', // Spotify green
-    },
-    secondary: {
-      main: '#191414', // Spotify black
-    },
-    background: {
-      default: '#121212',
-      paper: '#181818',
-    },
-    divider: 'rgba(255, 255, 255, 0.12)',
-  },
-  typography: {
-    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
-    h5: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 600,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 4,
-          textTransform: 'none',
-          fontWeight: 600,
-        },
-        containedPrimary: {
-          '&:hover': {
-            backgroundColor: '#1ed760',
-          },
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: '#121212',
-          borderRight: '1px solid rgba(255, 255, 255, 0.12)',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-        },
-      },
-    },
-    MuiListItemButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          margin: '4px 8px',
-          '&.Mui-selected': {
-            backgroundColor: 'rgba(29, 185, 84, 0.12)',
-            '& .MuiListItemIcon-root': {
-              color: '#1DB954',
-            },
-          },
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-          },
-        },
-      },
-    },
-  },
-});
+import { 
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MusicNote as MusicIcon,
+  Person as PersonIcon,
+  Dashboard as DashboardIcon,
+  Logout as LogoutIcon,
+  PhotoCamera as CameraIcon,
+  AudioFile as AudioFileIcon,
+  Info as InfoIcon
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 function AdminDashboard() {
-  const [open, setOpen] = useState(true);
-  const [view, setView] = useState('dashboard');
-  const [menuOpen, setMenuOpen] = useState(null);
-  const [notificationsOpen, setNotificationsOpen] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [contentManagementOpen, setContentManagementOpen] = useState(true);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [songs, setSongs] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [openSongDialog, setOpenSongDialog] = useState(false);
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   
-  const isMobile = useMediaQuery(darkTheme.breakpoints.down('md'));
+  const [songForm, setSongForm] = useState({
+    title: '',
+    artist: '',
+    album: '',
+    genre: 'pop',
+    releaseYear: new Date().getFullYear(),
+    duration: 0,
+    coverImage: null,
+    audioFile: null
+  });
   
-  // Close drawer on mobile by default
   useEffect(() => {
-    setOpen(!isMobile);
-  }, [isMobile]);
-
-  // Sample notifications - would come from API
-  useEffect(() => {
-    setNotifications([
-      {
-        id: 1,
-        message: 'New artist verification request',
-        time: '2 hours ago',
-        read: false,
-      },
-      {
-        id: 2,
-        message: 'User reported content needs review',
-        time: '5 hours ago',
-        read: false,
-      },
-      {
-        id: 3,
-        message: 'System update scheduled for tonight',
-        time: 'Yesterday',
-        read: true,
-      },
-    ]);
+    fetchDashboardData();
   }, []);
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  const handleNavItemClick = (newView) => {
+  
+  const fetchDashboardData = async () => {
     setLoading(true);
-    setView(newView);
-    // Simulate loading
-    setTimeout(() => {
+    setError('');
+    
+    try {
+      // Get stats
+      const statsRes = await api.get('/admin/stats');
+      setStats(statsRes.data.data);
+      
+      // Get users based on active tab
+      if (activeTab === 1) {
+        const usersRes = await api.get('/admin/users');
+        setUsers(usersRes.data.data);
+      }
+      
+      // Get songs based on active tab
+      if (activeTab === 2) {
+        const songsRes = await api.get('/admin/songs');
+        setSongs(songsRes.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.response?.data?.message || 'Failed to load dashboard data');
+    } finally {
       setLoading(false);
-    }, 500);
-    if (isMobile) {
-      setOpen(false);
     }
   };
-
-  const handleMenuClick = (event) => {
-    setMenuOpen(event.currentTarget);
+  
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    
+    // Fetch data based on the selected tab
+    if (newValue === 1 && users.length === 0) {
+      fetchUsers();
+    } else if (newValue === 2 && songs.length === 0) {
+      fetchSongs();
+    }
   };
-
-  const handleMenuClose = () => {
-    setMenuOpen(null);
+  
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/admin/users');
+      setUsers(res.data.data);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err.response?.data?.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleNotificationsClick = (event) => {
-    setNotificationsOpen(event.currentTarget);
+  
+  const fetchSongs = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/admin/songs');
+      setSongs(res.data.data);
+    } catch (err) {
+      console.error('Error fetching songs:', err);
+      setError(err.response?.data?.message || 'Failed to load songs');
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleNotificationsClose = () => {
-    setNotificationsOpen(null);
-  };
-
-  const handleContentManagementClick = () => {
-    setContentManagementOpen(!contentManagementOpen);
-  };
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
+  
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
       return;
     }
-    setSnackbar({ ...snackbar, open: false });
+    
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      // Remove the deleted user from the state
+      setUsers(users.filter(user => user._id !== userId));
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError(err.response?.data?.message || 'Failed to delete user');
+    }
   };
-
-  // Function to show notifications
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
+  
+  const handleAddSong = () => {
+    setSelectedSong(null);
+    setSongForm({
+      title: '',
+      artist: '',
+      album: '',
+      genre: 'pop',
+      releaseYear: new Date().getFullYear(),
+      duration: 0,
+      coverImage: null,
+      audioFile: null
     });
+    setOpenSongDialog(true);
   };
-
-  // Render the selected view
-  const renderView = () => {
-    switch (view) {
-      case 'dashboard':
-        return <Dashboard showNotification={showNotification} />;
-      case 'users':
-        return <UserManagement showNotification={showNotification} />;
-      case 'artists':
-        return <ArtistManagement showNotification={showNotification} />;
-      case 'albums':
-        return <AlbumManagement showNotification={showNotification} />;
-      case 'tracks':
-        return <TrackManagement showNotification={showNotification} />;
-      case 'playlists':
-        return <PlaylistManagement showNotification={showNotification} />;
-      case 'genres':
-        return <GenreManagement showNotification={showNotification} />;
-      case 'reports':
-        return <ReportManagement showNotification={showNotification} />;
-      case 'analytics':
-        return <AnalyticsView showNotification={showNotification} />;
-      case 'payments':
-        return <PaymentManagement showNotification={showNotification} />;
-      case 'settings':
-        return <Settings showNotification={showNotification} />;
-      default:
-        return <Dashboard showNotification={showNotification} />;
+  
+  const handleEditSong = (song) => {
+    setSelectedSong(song);
+    setSongForm({
+      title: song.title,
+      artist: song.artist,
+      album: song.album || '',
+      genre: song.genre,
+      releaseYear: song.releaseYear,
+      duration: song.duration,
+      coverImage: null,
+      audioFile: null
+    });
+    setOpenSongDialog(true);
+  };
+  
+  const handleDeleteSong = async (songId) => {
+    if (!window.confirm('Are you sure you want to delete this song?')) {
+      return;
+    }
+    
+    try {
+      await api.delete(`/admin/songs/${songId}`);
+      // Remove the deleted song from the state
+      setSongs(songs.filter(song => song._id !== songId));
+    } catch (err) {
+      console.error('Error deleting song:', err);
+      setError(err.response?.data?.message || 'Failed to delete song');
+    }
+  };
+  
+  const handleSongFormChange = (e) => {
+    const { name, value, files } = e.target;
+    
+    if (name === 'coverImage' || name === 'audioFile') {
+      setSongForm(prev => ({
+        ...prev,
+        [name]: files[0]
+      }));
+    } else {
+      setSongForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+  
+  const handleSubmitSong = async (e) => {
+    e.preventDefault();
+    
+    // Create FormData object to send files
+    const formData = new FormData();
+    Object.keys(songForm).forEach(key => {
+      if (songForm[key] !== null) {
+        formData.append(key, songForm[key]);
+      }
+    });
+    
+    try {
+      if (selectedSong) {
+        // Update existing song
+        await api.put(`/admin/songs/${selectedSong._id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        // Refresh songs list
+        fetchSongs();
+      } else {
+        // Upload new song
+        await api.post('/admin/songs', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        // Refresh songs list
+        fetchSongs();
+      }
+      
+      // Close dialog
+      setOpenSongDialog(false);
+    } catch (err) {
+      console.error('Error submitting song:', err);
+      setError(err.response?.data?.message || 'Failed to save song');
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+  
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
   return (
-    <ThemeProvider theme={darkTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        
-        {/* Top App Bar */}
-        <AppBar
-          position="fixed"
-          sx={{
-            backgroundColor: 'rgba(18, 18, 18, 0.98)',
-            backdropFilter: 'blur(20px)',
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            transition: (theme) =>
-              theme.transitions.create(['width', 'margin'], {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
-            ...(open && {
-              marginLeft: drawerWidth,
-              width: `calc(100% - ${drawerWidth}px)`,
-              transition: (theme) =>
-                theme.transitions.create(['width', 'margin'], {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-            }),
-          }}
-          elevation={0}
-        >
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              sx={{
-                marginRight: 2,
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                flexGrow: 1,
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {view === 'dashboard' && 'Admin Dashboard'}
-              {view === 'users' && 'User Management'}
-              {view === 'artists' && 'Artist Management'}
-              {view === 'albums' && 'Album Management'}
-              {view === 'tracks' && 'Track Management'}
-              {view === 'playlists' && 'Playlist Management'}
-              {view === 'genres' && 'Genre Management'}
-              {view === 'reports' && 'Report Management'}
-              {view === 'analytics' && 'Analytics & Insights'}
-              {view === 'payments' && 'Payment Management'}
-              {view === 'settings' && 'System Settings'}
-            </Typography>
-            
-            {/* Notifications button */}
-            <IconButton 
-              color="inherit"
-              onClick={handleNotificationsClick}
-            >
-              <Badge badgeContent={notifications.filter(n => !n.read).length} color="primary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            
-            {/* User menu */}
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                }}
-                onClick={handleMenuClick}
-              >
-                <Avatar 
-                  sx={{ 
-                    width: 36, 
-                    height: 36,
-                    bgcolor: 'primary.main',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  AP
-                </Avatar>
-                {!isMobile && (
-                  <>
-                    <Typography
-                      variant="body2"
-                      sx={{ ml: 1, fontWeight: 600, display: { xs: 'none', sm: 'block' } }}
-                    >
-                      Admin User
-                    </Typography>
-                    <ArrowDropDownIcon sx={{ display: { xs: 'none', sm: 'block' } }} />
-                  </>
-                )}
-              </Box>
-            </Box>
-            
-            {/* Notifications menu */}
-            <Menu
-              id="notifications-menu"
-              anchorEl={notificationsOpen}
-              open={Boolean(notificationsOpen)}
-              onClose={handleNotificationsClose}
-              PaperProps={{
-                sx: {
-                  mt: 1.5,
-                  width: 360,
-                  maxWidth: '100%',
-                  maxHeight: 400,
-                },
-              }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            >
-              <Box sx={{ p: 2, pb: 1 }}>
-                <Typography variant="h6">Notifications</Typography>
-              </Box>
-              <Divider />
-              <List sx={{ py: 0 }}>
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <ListItemButton
-                      key={notification.id}
-                      sx={{
-                        py: 2,
-                        backgroundColor: notification.read ? 'transparent' : 'rgba(29, 185, 84, 0.08)',
-                        '&:hover': {
-                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(29, 185, 84, 0.12)',
-                        },
-                      }}
-                    >
-                      <ListItemIcon>
-                        <NotificationsIcon color={notification.read ? 'disabled' : 'primary'} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={notification.message}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          fontWeight: notification.read ? 400 : 600,
-                        }}
-                        secondary={notification.time}
-                      />
-                    </ListItemButton>
-                  ))
-                ) : (
-                  <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      No notifications
-                    </Typography>
-                  </Box>
-                )}
-              </List>
-              {notifications.length > 0 && (
-                <Box sx={{ p: 1.5, textAlign: 'center' }}>
-                  <Button
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      handleNotificationsClose();
-                      // Mark all as read logic
-                      setNotifications(notifications.map(n => ({ ...n, read: true })));
-                    }}
-                  >
-                    Mark all as read
-                  </Button>
-                </Box>
-              )}
-            </Menu>
-            
-            {/* User menu */}
-            <Menu
-              id="profile-menu"
-              anchorEl={menuOpen}
-              open={Boolean(menuOpen)}
-              onClose={handleMenuClose}
-              PaperProps={{
-                sx: { mt: 1.5, width: 200 },
-              }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            >
-              <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                  <PersonIcon fontSize="small" />
-                </ListItemIcon>
-                Profile
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                  <SettingsIcon fontSize="small" />
-                </ListItemIcon>
-                Settings
-              </MenuItem>
-              <Divider />
-              <MenuItem onClick={handleMenuClose}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
-          </Toolbar>
-          {loading && <LinearProgress color="primary" />}
-        </AppBar>
-        
-        {/* Side Navigation Drawer */}
-        <Drawer
-          variant={isMobile ? "temporary" : "permanent"}
-          open={open}
-          onClose={handleDrawerClose}
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: drawerWidth,
-              boxSizing: 'border-box',
-              borderRight: '1px solid rgba(255, 255, 255, 0.12)',
-            },
-          }}
-        >
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: [1],
-              borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      backgroundColor: '#121212', 
+      minHeight: '100vh'
+    }}>
+      <AppBar position="static" sx={{ backgroundColor: '#1a1a1a', boxShadow: 1 }}>
+        <Toolbar>
+          <MusicIcon sx={{ mr: 2, color: '#1DB954' }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            MelodyHub Admin
+          </Typography>
+          <Button 
+            color="inherit" 
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            sx={{ 
+              borderRadius: 2,
+              '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
             }}
           >
-            <Typography
-              variant="h6"
+            Logout
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" color="primary" fontWeight="bold" sx={{ mb: 2 }}>
+            Dashboard Overview
+          </Typography>
+          
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              backgroundColor: '#1e1e1e', 
+              color: '#fff', 
+              borderRadius: 2,
+              overflow: 'hidden'
+            }}
+          >
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange}
+              variant="fullWidth"
               sx={{
-                fontWeight: 800,
-                color: '#1DB954',
-                pl: 1.5,
-                fontSize: '1.5rem',
-                letterSpacing: 1,
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#1DB954',
+                  height: 3
+                },
+                '& .Mui-selected': {
+                  color: '#1DB954 !important',
+                },
+                '& .MuiTab-root': {
+                  fontSize: '1rem',
+                  py: 2
+                }
               }}
             >
-              MUSICIFY
-            </Typography>
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Box sx={{ overflow: 'auto', mt: 2 }}>
-            <List component="nav" sx={{ px: 2 }}>
-              {/* Main Navigation */}
-              <ListItemButton
-                selected={view === 'dashboard'}
-                onClick={() => handleNavItemClick('dashboard')}
-              >
-                <ListItemIcon>
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItemButton>
-              
-              <ListItemButton
-                selected={view === 'users'}
-                onClick={() => handleNavItemClick('users')}
-              >
-                <ListItemIcon>
-                  <PeopleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Users" />
-              </ListItemButton>
-              
-              <ListItemButton
-                selected={view === 'artists'}
-                onClick={() => handleNavItemClick('artists')}
-              >
-                <ListItemIcon>
-                  <PersonIcon />
-                </ListItemIcon>
-                <ListItemText primary="Artists" />
-              </ListItemButton>
-              
-              {/* Content Management Section */}
-              <ListItemButton onClick={handleContentManagementClick}>
-                <ListItemIcon>
-                  <LibraryMusicIcon />
-                </ListItemIcon>
-                <ListItemText primary="Content Management" />
-                {contentManagementOpen ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-              
-              <Collapse in={contentManagementOpen} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  <ListItemButton
-                    selected={view === 'albums'}
-                    onClick={() => handleNavItemClick('albums')}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemIcon>
-                      <AlbumIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Albums" />
-                  </ListItemButton>
-                  
-                  <ListItemButton
-                    selected={view === 'tracks'}
-                    onClick={() => handleNavItemClick('tracks')}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemIcon>
-                      <QueueMusicIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Tracks" />
-                  </ListItemButton>
-                  
-                  <ListItemButton
-                    selected={view === 'playlists'}
-                    onClick={() => handleNavItemClick('playlists')}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemIcon>
-                      <PlaylistAddIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Playlists" />
-                  </ListItemButton>
-                  
-                  <ListItemButton
-                    selected={view === 'genres'}
-                    onClick={() => handleNavItemClick('genres')}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemIcon>
-                      <CategoryIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Genres" />
-                  </ListItemButton>
-                </List>
-              </Collapse>
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <ListItemButton
-                selected={view === 'analytics'}
-                onClick={() => handleNavItemClick('analytics')}
-              >
-                <ListItemIcon>
-                  <BarChartIcon />
-                </ListItemIcon>
-                <ListItemText primary="Analytics" />
-              </ListItemButton>
-              
-              <ListItemButton
-                selected={view === 'payments'}
-                onClick={() => handleNavItemClick('payments')}
-              >
-                <ListItemIcon>
-                  <PaymentIcon />
-                </ListItemIcon>
-                <ListItemText primary="Payments" />
-              </ListItemButton>
-              
-              <ListItemButton
-                selected={view === 'reports'}
-                onClick={() => handleNavItemClick('reports')}
-              >
-                <ListItemIcon>
-                  <ReportIcon />
-                </ListItemIcon>
-                <ListItemText primary="Reports & Issues" />
-              </ListItemButton>
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <ListItemButton
-                selected={view === 'settings'}
-                onClick={() => handleNavItemClick('settings')}
-              >
-                <ListItemIcon>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItemButton>
-            </List>
-          </Box>
-        </Drawer>
-        
-        {/* Main Content */}
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            overflow: 'auto',
-            backgroundColor: theme => theme.palette.background.default,
-            pt: { xs: 9, sm: 11 },
-            pb: 8,
-            minHeight: '100vh',
-          }}
-        >
-          {renderView()}
+              <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" sx={{ color: '#fff' }} />
+              <Tab icon={<PersonIcon />} label="Users" iconPosition="start" sx={{ color: '#fff' }} />
+              <Tab icon={<MusicIcon />} label="Songs" iconPosition="start" sx={{ color: '#fff' }} />
+            </Tabs>
+          </Paper>
         </Box>
         
-        {/* Snackbar for notifications */}
-        <Snackbar 
-          open={snackbar.open} 
-          autoHideDuration={6000} 
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert 
-            onClose={handleSnackbarClose} 
-            severity={snackbar.severity} 
-            variant="filled"
-            sx={{ width: '100%' }}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <CircularProgress color="primary" size={60} />
+          </Box>
+        ) : error ? (
+          <Paper sx={{ p: 3, backgroundColor: '#2a2a2a', color: '#ff6b6b', borderRadius: 2 }}>
+            <Typography>{error}</Typography>
+          </Paper>
+        ) : (
+          <>
+            {/* Dashboard Tab */}
+            {activeTab === 0 && stats && (
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', height: '100%', borderRadius: 2 }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                          <PersonIcon sx={{ color: '#1DB954' }}/>
+                        </Avatar>
+                        <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                          User Statistics
+                        </Typography>
+                      </Box>
+                      <Typography variant="h3" fontWeight="bold">
+                        {stats.totalUsers}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ color: '#b3b3b3', mt: 1 }}>
+                        Total Registered Users
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', height: '100%', borderRadius: 2 }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                          <MusicIcon sx={{ color: '#1DB954' }}/>
+                        </Avatar>
+                        <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                          Music Statistics
+                        </Typography>
+                      </Box>
+                      <Typography variant="h3" fontWeight="bold">
+                        {stats.totalSongs}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ color: '#b3b3b3', mt: 1 }}>
+                        Total Available Songs
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 2 }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                          <MusicIcon sx={{ color: '#1DB954' }}/>
+                        </Avatar>
+                        <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                          Songs by Genre
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                        {stats.songsByGenre.map((genre) => (
+                          <Chip
+                            key={genre._id}
+                            label={`${genre._id.charAt(0).toUpperCase() + genre._id.slice(1)}: ${genre.count}`}
+                            sx={{
+                              bgcolor: 'rgba(29, 185, 84, 0.1)',
+                              color: '#fff',
+                              fontWeight: 'medium',
+                              fontSize: '0.9rem',
+                              py: 2.5
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            )}
+            
+            {/* Users Tab */}
+            {activeTab === 1 && (
+              <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                        <PersonIcon sx={{ color: '#1DB954' }}/>
+                      </Avatar>
+                      <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                        Manage Users
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  <TableContainer sx={{ borderRadius: 1, overflow: 'hidden' }}>
+                    <Table>
+                      <TableHead sx={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <TableRow>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Name</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Email</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Role</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {users.map((user) => (
+                          <TableRow key={user._id} hover sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.03)' } }}>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>{user.name}</TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>{user.email}</TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              <Chip
+                                label={user.role}
+                                size="small"
+                                sx={{
+                                  backgroundColor: user.role === 'admin' ? 'rgba(29, 185, 84, 0.2)' : 'rgba(64, 115, 255, 0.2)',
+                                  color: user.role === 'admin' ? '#1DB954' : '#4073ff',
+                                  fontWeight: 'medium'
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              <Tooltip title={user.role === 'admin' ? "Can't delete admin users" : "Delete user"}>
+                                <span>
+                                  <IconButton
+                                    color="error"
+                                    onClick={() => handleDeleteUser(user._id)}
+                                    disabled={user.role === 'admin'}
+                                    size="small"
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Songs Tab */}
+            {activeTab === 2 && (
+              <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                        <MusicIcon sx={{ color: '#1DB954' }}/>
+                      </Avatar>
+                      <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                        Manage Songs
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<AddIcon />}
+                      onClick={handleAddSong}
+                      sx={{ borderRadius: 2, px: 3, py: 1 }}
+                    >
+                      Add Song
+                    </Button>
+                  </Box>
+                  
+                  <TableContainer sx={{ borderRadius: 1, overflow: 'hidden' }}>
+                    <Table>
+                      <TableHead sx={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <TableRow>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Cover</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Title</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Artist</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Genre</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Duration</TableCell>
+                          <TableCell sx={{ color: '#b3b3b3', borderBottom: '1px solid #333', fontWeight: 'bold' }}>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {songs.map((song) => (
+                          <TableRow key={song._id} hover sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.03)' } }}>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              <Box
+                                component="img"
+                                src={song.coverImage}
+                                alt={song.title}
+                                sx={{ 
+                                  width: 50, 
+                                  height: 50, 
+                                  borderRadius: 1,
+                                  objectFit: 'cover',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333', fontWeight: 'medium' }}>{song.title}</TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>{song.artist}</TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              <Chip 
+                                label={song.genre} 
+                                size="small"
+                                sx={{ 
+                                  backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                                  color: '#1DB954'
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              {formatDuration(song.duration)}
+                            </TableCell>
+                            <TableCell sx={{ color: '#fff', borderBottom: '1px solid #333' }}>
+                              <Stack direction="row" spacing={1}>
+                                <Tooltip title="Edit song">
+                                  <IconButton
+                                    onClick={() => handleEditSong(song)}
+                                    size="small"
+                                    sx={{ 
+                                      color: '#1DB954',
+                                      '&:hover': { backgroundColor: 'rgba(29, 185, 84, 0.1)' } 
+                                    }}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete song">
+                                  <IconButton
+                                    color="error"
+                                    onClick={() => handleDeleteSong(song._id)}
+                                    size="small"
+                                    sx={{ '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.1)' } }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </Container>
+      
+      {/* Improved Song Dialog */}
+      <Dialog 
+        open={openSongDialog} 
+        onClose={() => setOpenSongDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1e1e1e',
+            color: '#fff',
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          bgcolor: 'rgba(29, 185, 84, 0.1)', 
+          color: '#1DB954',
+          fontSize: '1.5rem',
+          pb: 2,
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <MusicIcon sx={{ mr: 1 }} />
+          {selectedSong ? 'Edit Song' : 'Add New Song'}
+        </DialogTitle>
+        
+        <DialogContent sx={{ py: 3 }}>
+          <Grid container spacing={3}>
+            {/* Left column - Cover Image and Audio File */}
+            <Grid item xs={12} md={4}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Box
+                  sx={{
+                    border: '2px dashed #333',
+                    borderRadius: 2,
+                    height: 220,
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    bgcolor: 'rgba(255,255,255,0.03)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {songForm.coverImage ? (
+                    <Box
+                      component="img"
+                      src={songForm.coverImage instanceof File ? URL.createObjectURL(songForm.coverImage) : songForm.coverImage}
+                      alt="Cover Preview"
+                      sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <>
+                      <CameraIcon sx={{ fontSize: 40, color: '#666', mb: 1 }} />
+                      <Typography variant="body2" color="#666" align="center">
+                        Cover Image
+                      </Typography>
+                    </>
+                  )}
+                  
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      bgcolor: 'rgba(0,0,0,0.7)',
+                      borderRadius: 0,
+                      '&:hover': {
+                        bgcolor: 'rgba(29, 185, 84, 0.7)',
+                      }
+                    }}
+                  >
+                    {songForm.coverImage ? 'Change Image' : 'Upload Cover'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      name="coverImage"
+                      onChange={handleSongFormChange}
+                      hidden
+                    />
+                  </Button>
+                </Box>
+                
+                <Box
+                  sx={{
+                    border: '2px dashed #333',
+                    borderRadius: 2,
+                    p: 2,
+                    mt: 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    bgcolor: 'rgba(255,255,255,0.03)',
+                  }}
+                >
+                  <AudioFileIcon sx={{ fontSize: 30, color: songForm.audioFile ? '#1DB954' : '#666', mb: 1 }} />
+                  <Typography variant="body2" color={songForm.audioFile ? '#1DB954' : '#666'} align="center" gutterBottom>
+                    {songForm.audioFile ? songForm.audioFile.name : 'No audio file selected'}
+                  </Typography>
+                  
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<AudioFileIcon />}
+                    fullWidth
+                    sx={{
+                      mt: 1,
+                      borderColor: songForm.audioFile ? '#1DB954' : '#333',
+                      color: songForm.audioFile ? '#1DB954' : '#fff',
+                      '&:hover': {
+                        borderColor: '#1DB954',
+                        bgcolor: 'rgba(29, 185, 84, 0.1)',
+                      }
+                    }}
+                  >
+                    {songForm.audioFile ? 'Change Audio' : 'Upload Audio File'}
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      name="audioFile"
+                      onChange={handleSongFormChange}
+                      hidden
+                    />
+                  </Button>
+                </Box>
+              </Box>
+            </Grid>
+            
+            {/* Right column - Song Details */}
+            <Grid item xs={12} md={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Title"
+                    name="title"
+                    value={songForm.title}
+                    onChange={handleSongFormChange}
+                    variant="outlined"
+                    InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+                    InputProps={{ sx: { color: '#fff' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: '#333' },
+                        '&:hover fieldset': { borderColor: '#444' },
+                        '&.Mui-focused fieldset': { borderColor: '#1DB954' }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Artist"
+                    name="artist"
+                    value={songForm.artist}
+                    onChange={handleSongFormChange}
+                    variant="outlined"
+                    InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+                    InputProps={{ sx: { color: '#fff' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: '#333' },
+                        '&:hover fieldset': { borderColor: '#444' },
+                        '&.Mui-focused fieldset': { borderColor: '#1DB954' }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Album (Optional)"
+                    name="album"
+                    value={songForm.album}
+                    onChange={handleSongFormChange}
+                    variant="outlined"
+                    InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+                    InputProps={{ sx: { color: '#fff' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: '#333' },
+                        '&:hover fieldset': { borderColor: '#444' },
+                        '&.Mui-focused fieldset': { borderColor: '#1DB954' }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel sx={{ color: '#b3b3b3' }}>Genre</InputLabel>
+                    <Select
+                      name="genre"
+                      value={songForm.genre}
+                      onChange={handleSongFormChange}
+                      label="Genre"
+                      sx={{
+                        color: '#fff',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#333'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#444'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#1DB954'
+                        }
+                      }}
+                    >
+                      <MenuItem value="pop">Pop</MenuItem>
+                      <MenuItem value="rock">Rock</MenuItem>
+                      <MenuItem value="hip-hop">Hip-Hop</MenuItem>
+                      <MenuItem value="jazz">Jazz</MenuItem>
+                      <MenuItem value="classical">Classical</MenuItem>
+                      <MenuItem value="electronic">Electronic</MenuItem>
+                      <MenuItem value="other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Release Year"
+                    name="releaseYear"
+                    value={songForm.releaseYear}
+                    onChange={handleSongFormChange}
+                    type="number"
+                    variant="outlined"
+                    InputProps={{ 
+                      inputProps: { min: 1900, max: new Date().getFullYear() },
+                      sx: { color: '#fff' }
+                    }}
+                    InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: '#333' },
+                        '&:hover fieldset': { borderColor: '#444' },
+                        '&.Mui-focused fieldset': { borderColor: '#1DB954' }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    label="Duration (seconds)"
+                    name="duration"
+                    value={songForm.duration}
+                    onChange={handleSongFormChange}
+                    type="number"
+                    variant="outlined"
+                    InputProps={{ 
+                      inputProps: { min: 1 },
+                      sx: { color: '#fff' }
+                    }}
+                    InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': { borderColor: '#333' },
+                        '&:hover fieldset': { borderColor: '#444' },
+                        '&.Mui-focused fieldset': { borderColor: '#1DB954' }
+                      }
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    bgcolor: 'rgba(255,255,255,0.03)', 
+                    p: 2, 
+                    borderRadius: 1,
+                    mt: 1
+                  }}>
+                    <InfoIcon sx={{ color: '#b3b3b3', mr: 1.5 }} />
+                    <Typography variant="body2" color="#b3b3b3">
+                      {selectedSong 
+                        ? "If you don't upload new files, the existing ones will be kept."
+                        : "Please ensure audio files are in MP3 format and cover images are high quality."}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+        
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button 
+            onClick={() => setOpenSongDialog(false)}
+            variant="text"
+            sx={{ 
+              color: '#b3b3b3',
+              '&:hover': {
+                color: '#fff',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Box>
-    </ThemeProvider> 
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmitSong}
+            variant="contained"
+            color="primary"
+            disabled={!songForm.title || !songForm.artist || (!songForm.audioFile && !selectedSong)}
+            sx={{
+              px: 3,
+              borderRadius: 2,
+              fontWeight: 'medium',
+              boxShadow: 2
+            }}
+          >
+            {selectedSong ? 'Update Song' : 'Upload Song'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
 

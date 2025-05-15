@@ -9,39 +9,89 @@ import {
   Link,
   Alert,
   IconButton,
+  InputAdornment,
   CircularProgress
 } from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EmailIcon from '@mui/icons-material/Email';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import api from '../../services/api';
+import { storeAuth, setAuthToken } from '../../utils/auth';
 
-function ForgotPassword() {
+function ResetPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { resetToken } = useParams();
+  const [formData, setFormData] = useState({
+    password: '',
+    confirmPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    
+    // Clear error when field is edited
+    if (formErrors[name]) {
+      setFormErrors({
+        ...formErrors,
+        [name]: ''
+      });
+    }
+  };
+  
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     
-    if (!email.trim()) {
-      setError('Please enter your email address');
-      return;
-    }
+    if (!validateForm()) return;
     
     setLoading(true);
+    setError('');
     
     try {
-      await api.post('/auth/forgot-password', { email });
-      setIsSubmitted(true);
+      const response = await api.put(`/auth/reset-password/${resetToken}`, { 
+        password: formData.password 
+      });
+      
+      setIsSuccess(true);
+      
+      // If the API returns token and user, store them
+      if (response.data.token && response.data.user) {
+        storeAuth(response.data.token, response.data.user);
+        setAuthToken(response.data.token);
+      }
     } catch (err) {
-      console.error('Forgot password error:', err);
+      console.error('Reset password error:', err);
       setError(err.response?.data?.message || 
-        'Failed to send reset email. Please check your email address and try again.');
+        'Failed to reset password. The reset link may be invalid or expired.');
     } finally {
       setLoading(false);
     }
@@ -137,14 +187,16 @@ function ForgotPassword() {
                 </Box>
 
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textAlign: 'center' }}>
-                  Reset Password
+                  {isSuccess ? 'Password Reset' : 'Create New Password'}
                 </Typography>
                 
                 <Typography variant="body1" sx={{ mb: 4, textAlign: 'center', color: '#b3b3b3' }}>
-                  Enter your email address and we'll send you a link to reset your password
+                  {isSuccess 
+                    ? 'Your password has been successfully reset'
+                    : 'Enter your new password below'}
                 </Typography>
                 
-                {isSubmitted ? (
+                {isSuccess ? (
                   <Box sx={{ textAlign: 'center' }}>
                     <Box 
                       sx={{
@@ -158,7 +210,7 @@ function ForgotPassword() {
                         margin: '0 auto 24px'
                       }}
                     >
-                      <EmailIcon sx={{ fontSize: 40, color: '#1DB954' }} />
+                      <CheckCircleIcon sx={{ fontSize: 40, color: '#1DB954' }} />
                     </Box>
 
                     <Alert 
@@ -172,16 +224,12 @@ function ForgotPassword() {
                         }
                       }}
                     >
-                      Reset link sent! Please check your email inbox.
+                      Your password has been successfully reset.
                     </Alert>
-                    
-                    <Typography variant="body2" sx={{ mb: 3, color: '#b3b3b3' }}>
-                      If you don't see the email in your inbox, please check your spam folder.
-                    </Typography>
                     
                     <Button
                       fullWidth
-                      variant="outlined"
+                      variant="contained"
                       color="primary"
                       onClick={() => navigate('/login')}
                       sx={{
@@ -189,15 +237,16 @@ function ForgotPassword() {
                         borderRadius: 2,
                         fontSize: '1rem',
                         fontWeight: 600,
-                        borderColor: '#1DB954',
-                        color: '#1DB954',
+                        boxShadow: '0 4px 12px rgba(29, 185, 84, 0.4)',
+                        background: 'linear-gradient(90deg, #1DB954, #1ed760)',
                         '&:hover': {
-                          borderColor: '#1DB954',
-                          backgroundColor: 'rgba(29, 185, 84, 0.08)'
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 16px rgba(29, 185, 84, 0.6)',
+                          background: 'linear-gradient(90deg, #1DB954, #1ed760)',
                         }
                       }}
                     >
-                      Return to Login
+                      Login with New Password
                     </Button>
                   </Box>
                 ) : (
@@ -220,14 +269,66 @@ function ForgotPassword() {
                     
                     <TextField
                       fullWidth
-                      name="email"
-                      label="Email Address"
-                      type="email"
+                      id="password"
+                      name="password"
+                      label="New Password"
+                      type={showPassword ? 'text' : 'password'}
                       variant="outlined"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={formData.password}
+                      onChange={handleChange}
+                      error={!!formErrors.password}
+                      helperText={formErrors.password}
                       InputProps={{
-                        sx: { borderRadius: 2, fontSize: '1.1rem' }
+                        sx: { borderRadius: 2, fontSize: '1.1rem' },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword(!showPassword)}
+                              edge="end"
+                              sx={{ color: 'rgba(255,255,255,0.7)' }}
+                            >
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(29, 185, 84, 0.5)',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#1DB954',
+                          },
+                        },
+                      }}
+                    />
+                    
+                    <TextField
+                      fullWidth
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      label="Confirm New Password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      variant="outlined"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      error={!!formErrors.confirmPassword}
+                      helperText={formErrors.confirmPassword}
+                      InputProps={{
+                        sx: { borderRadius: 2, fontSize: '1.1rem' },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              edge="end"
+                              sx={{ color: 'rgba(255,255,255,0.7)' }}
+                            >
+                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -265,30 +366,10 @@ function ForgotPassword() {
                         }
                       }}
                     >
-                      {loading ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
+                      {loading ? <CircularProgress size={24} color="inherit" /> : 'Reset Password'}
                     </Button>
                   </Box>
                 )}
-                
-                <Box sx={{ textAlign: 'center', mt: 4 }}>
-                  <Typography variant="body1" sx={{ color: '#b3b3b3' }}>
-                    Remember your password?{' '}
-                    <Link
-                      component={RouterLink}
-                      to="/login"
-                      sx={{ 
-                        color: '#1DB954', 
-                        textDecoration: 'none',
-                        fontWeight: 600,
-                        '&:hover': {
-                          textDecoration: 'underline'
-                        }
-                      }}
-                    >
-                      Login
-                    </Link>
-                  </Typography>
-                </Box>
               </Box>
             </Box>
           </Paper>
@@ -298,4 +379,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword;
+export default ResetPassword;

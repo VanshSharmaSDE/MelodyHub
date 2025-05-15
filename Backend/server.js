@@ -1,21 +1,71 @@
-import express from "express";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
 
-import cors from "cors";
+// Route imports
+const authRoutes = require('./routes/authRoutes.js');
+const adminRoutes = require('./routes/adminRoutes.js');
+const userRoutes = require('./routes/userRoutes.js');
 
+// Admin initialization
+const createAdminUser = require('./config/createAdmin.js');
+
+// Load environment variables
 dotenv.config();
+
+// Create Express app
 const app = express();
 
-app.use(cors());
+// Middleware
 app.use(express.json());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log("MongoDB connected");
-  app.listen(process.env.PORT, () =>
-    console.log(`Server running on port ${process.env.PORT}`)
-  );
-}).catch(err => console.error(err));
+// Set static folder for uploaded files
+app.use(express.static(path.join(__dirname, 'uploads')));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/user', userRoutes);
+
+// Special route for serving uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Server Error'
+  });
+});
+
+// Connect to MongoDB and start server
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/musicify';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    
+    // Create admin user on startup
+    createAdminUser();
+    
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
