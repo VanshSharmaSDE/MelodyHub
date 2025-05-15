@@ -457,6 +457,358 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// Import Playlist model
+const Playlist = require('../models/Playlist.js');
+
+// @desc    Get all playlists
+// @route   GET /api/admin/playlists
+// @access  Private/Admin
+const getAllPlaylists = async (req, res) => {
+  try {
+    const playlists = await Playlist.find()
+      .populate({
+        path: 'songs',
+        select: 'title artist album coverImage duration'
+      })
+      .populate({
+        path: 'createdBy',
+        select: 'name email'
+      });
+    
+    res.status(200).json({
+      success: true,
+      count: playlists.length,
+      data: playlists
+    });
+  } catch (error) {
+    console.error('Error getting playlists:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Get playlist by ID
+// @route   GET /api/admin/playlists/:id
+// @access  Private/Admin
+const getPlaylistById = async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id)
+      .populate({
+        path: 'songs',
+        select: 'title artist album coverImage duration audioFile'
+      })
+      .populate({
+        path: 'createdBy',
+        select: 'name email'
+      });
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Playlist not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error getting playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Create a playlist
+// @route   POST /api/admin/playlists
+// @access  Private/Admin
+const createPlaylist = async (req, res) => {
+  try {
+    const { name, description, isDefault, isPublic } = req.body;
+    
+    // Create playlist data
+    const playlistData = {
+      name,
+      description: description || '',
+      isDefault: isDefault === 'true' || isDefault === true,
+      isPublic: isPublic !== undefined ? (isPublic === 'true' || isPublic === true) : true,
+      songs: [],
+      createdBy: req.user.id
+    };
+    
+    // Handle cover image upload if provided
+    if (req.files && req.files.coverImage) {
+      const coverImage = req.files.coverImage;
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(coverImage.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please upload a valid image file (JPEG, JPG or PNG)'
+        });
+      }
+      
+      // Create unique filename
+      const fileName = `playlist_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
+      
+      // Define paths for storage - directly in Backend/uploads
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const playlistsDir = path.join(uploadsDir, 'playlists');
+      
+      // Create directories if they don't exist
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      if (!fs.existsSync(playlistsDir)) {
+        fs.mkdirSync(playlistsDir, { recursive: true });
+      }
+      
+      const imagePath = path.join(playlistsDir, fileName);
+      
+      // Move file
+      await coverImage.mv(imagePath);
+      
+      // Define URL path with server URL for database
+      const serverBaseUrl = process.env.SERVER_URL || 'http://localhost:5000';
+      const imageFileUrl = `${serverBaseUrl}/uploads/playlists/${fileName}`;
+      
+      // Update cover image path
+      playlistData.coverImage = imageFileUrl;
+    }
+    
+    // Create playlist in database
+    const playlist = await Playlist.create(playlistData);
+    
+    res.status(201).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error creating playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Update a playlist
+// @route   PUT /api/admin/playlists/:id
+// @access  Private/Admin
+const updatePlaylist = async (req, res) => {
+  try {
+    const { name, description, isDefault, isPublic } = req.body;
+    
+    let playlist = await Playlist.findById(req.params.id);
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Playlist not found'
+      });
+    }
+    
+    // Update playlist data
+    const playlistData = {
+      name: name || playlist.name,
+      description: description !== undefined ? description : playlist.description,
+      isDefault: isDefault !== undefined ? (isDefault === 'true' || isDefault === true) : playlist.isDefault,
+      isPublic: isPublic !== undefined ? (isPublic === 'true' || isPublic === true) : playlist.isPublic
+    };
+    
+    // Handle cover image upload if provided
+    if (req.files && req.files.coverImage) {
+      const coverImage = req.files.coverImage;
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(coverImage.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please upload a valid image file (JPEG, JPG or PNG)'
+        });
+      }
+      
+      // Create unique filename
+      const fileName = `playlist_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
+      
+      // Define paths for storage - directly in Backend/uploads
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const playlistsDir = path.join(uploadsDir, 'playlists');
+      
+      // Create directories if they don't exist
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      if (!fs.existsSync(playlistsDir)) {
+        fs.mkdirSync(playlistsDir, { recursive: true });
+      }
+      
+      const imagePath = path.join(playlistsDir, fileName);
+      
+      // Move file
+      await coverImage.mv(imagePath);
+      
+      // Delete old cover image if it exists and isn't the default
+      if (playlist.coverImage !== 'default-playlist.jpg') {
+        const oldImagePath = path.join(__dirname, '../../public', playlist.coverImage);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      
+      // Update cover image path
+      playlistData.coverImage = `/uploads/playlists/${fileName}`;
+    }
+    
+    // Update playlist in database
+    playlist = await Playlist.findByIdAndUpdate(
+      req.params.id,
+      playlistData,
+      { new: true, runValidators: true }
+    );
+    
+    res.status(200).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error updating playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Add song to playlist
+// @route   PUT /api/admin/playlists/:id/songs/:songId
+// @access  Private/Admin
+const addSongToPlaylist = async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Playlist not found'
+      });
+    }
+    
+    const songId = req.params.songId;
+    
+    // Check if song already exists in playlist
+    if (playlist.songs.includes(songId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Song already in playlist'
+      });
+    }
+    
+    // Add song to playlist
+    playlist.songs.push(songId);
+    await playlist.save();
+    
+    res.status(200).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error adding song to playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Remove song from playlist
+// @route   DELETE /api/admin/playlists/:id/songs/:songId
+// @access  Private/Admin
+const removeSongFromPlaylist = async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Playlist not found'
+      });
+    }
+    
+    const songId = req.params.songId;
+    
+    // Check if song exists in playlist
+    const songIndex = playlist.songs.indexOf(songId);
+    
+    if (songIndex === -1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Song not found in playlist'
+      });
+    }
+    
+    // Remove song from playlist
+    playlist.songs.splice(songIndex, 1);
+    await playlist.save();
+    
+    res.status(200).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error removing song from playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Delete a playlist
+// @route   DELETE /api/admin/playlists/:id
+// @access  Private/Admin
+const deletePlaylist = async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Playlist not found'
+      });
+    }
+    
+    // Delete cover image if it exists and isn't the default
+    if (playlist.coverImage !== 'default-playlist.jpg') {
+      const imagePath = path.join(__dirname, '../../public', playlist.coverImage);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+    
+    // Delete playlist from database
+    await Playlist.findByIdAndDelete(req.params.id);
+    
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -467,5 +819,13 @@ module.exports = {
   uploadSong,
   updateSong,
   deleteSong,
-  getDashboardStats
+  getDashboardStats,
+  // Add playlist management functions
+  getAllPlaylists,
+  getPlaylistById,
+  createPlaylist,
+  updatePlaylist,
+  addSongToPlaylist,
+  removeSongFromPlaylist,
+  deletePlaylist
 };

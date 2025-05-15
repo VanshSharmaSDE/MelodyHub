@@ -17,7 +17,9 @@ const {
   getRecentlyPlayed,
   downloadSong,
   getAllSongs,
-  searchSongs
+  searchSongs,
+  getDefaultPlaylists,
+  getDefaultPlaylistById
 } = require('../controllers/userController.js');
 
 const router = express.Router();
@@ -71,5 +73,6 @@ router.route('/playlists/:playlistId')
 router.route('/playlists/:playlistId/songs/:songId')
   .put(addSongToPlaylist)
   .delete(removeSongFromPlaylist);
+
 
 module.exports = router;

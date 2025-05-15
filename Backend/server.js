@@ -8,6 +8,7 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes.js');
 const adminRoutes = require('./routes/adminRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
+const playlistRoutes = require('./routes/playlistRoutes.js');
 
 // Admin initialization
 const createAdminUser = require('./config/createAdmin.js');
@@ -32,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/public', playlistRoutes);
 
 // Special route for serving uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

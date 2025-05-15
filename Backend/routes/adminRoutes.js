@@ -11,7 +11,14 @@ const {
   uploadSong,
   updateSong,
   deleteSong,
-  getDashboardStats
+  getDashboardStats,
+  getAllPlaylists,
+  getPlaylistById,
+  createPlaylist,
+  updatePlaylist,
+  deletePlaylist,
+  addSongToPlaylist,
+  removeSongFromPlaylist
 } = require('../controllers/adminController.js');
 
 const router = express.Router();
@@ -44,6 +51,20 @@ router.route('/songs/:id')
   .get(getSongById)
   .put(updateSong)
   .delete(deleteSong);
+
+// Playlist management routes
+router.route('/playlists')
+  .get(getAllPlaylists)
+  .post(createPlaylist);
+
+router.route('/playlists/:id')
+  .get(getPlaylistById)
+  .put(updatePlaylist)
+  .delete(deletePlaylist);
+
+router.route('/playlists/:id/songs/:songId')
+  .put(addSongToPlaylist)
+  .delete(removeSongFromPlaylist);
 
 // Dashboard statistics
 router.get('/stats', getDashboardStats);

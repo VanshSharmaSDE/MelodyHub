@@ -2,6 +2,7 @@ const User = require('../models/User.js');
 const Song = require('../models/Song.js');
 const path = require('path');
 const fs = require('fs');
+const Playlist = require('../models/Playlist.js');
 
 // @desc    Get user profile
 // @route   GET /api/user/profile
@@ -900,6 +901,69 @@ const searchSongs = async (req, res) => {
   }
 };
 
+// @desc    Get all default playlists
+// @route   GET /api/user/playlists/default
+// @access  Private
+const getDefaultPlaylists = async (req, res) => {
+  try {
+    // Find all default playlists that are public
+    const defaultPlaylists = await Playlist.find({ 
+      isDefault: true, 
+      isPublic: true 
+    }).populate({
+      path: 'songs',
+      select: 'title artist album coverImage duration'
+    });
+    
+    res.status(200).json({
+      success: true,
+      count: defaultPlaylists.length,
+      data: defaultPlaylists
+    });
+  } catch (error) {
+    console.error('Error getting default playlists:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
+// @desc    Get default playlist by ID
+// @route   GET /api/user/playlists/default/:id
+// @access  Private
+const getDefaultPlaylistById = async (req, res) => {
+  try {
+    // Find default playlist by ID and ensure it's public
+    const playlist = await Playlist.findOne({ 
+      _id: req.params.id,
+      isDefault: true,
+      isPublic: true
+    }).populate({
+      path: 'songs',
+      select: 'title artist album coverImage duration audioFile'
+    });
+    
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Default playlist not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: playlist
+    });
+  } catch (error) {
+    console.error('Error getting default playlist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
@@ -916,5 +980,7 @@ module.exports = {
   getRecentlyPlayed,
   downloadSong,
   getAllSongs,
-  searchSongs
+  searchSongs,
+  getDefaultPlaylists,
+  getDefaultPlaylistById
 };
