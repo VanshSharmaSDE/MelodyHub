@@ -60,7 +60,9 @@ const SongSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  cloudinaryImageId: { type: String },
+  cloudinaryAudioId: { type: String },
 });
 
 // Update the updatedAt field before saving

@@ -175,7 +175,7 @@ function Footer() {
 
               <Grid item xs={12} md={6}>
                 {/* Download App */}
-                <Box sx={{ mb: 4, mt: { xs: 0, md: 2 } }}>
+                {/* <Box sx={{ mb: 4, mt: { xs: 0, md: 2 } }}>
                   <Typography
                     variant="subtitle1"
                     sx={{
@@ -225,7 +225,7 @@ function Footer() {
                       </Button>
                     ))}
                   </Box>
-                </Box>
+                </Box> */}
 
                 {/* Customer Support */}
                 <Box sx={{ mb: 3 }}>
@@ -256,7 +256,7 @@ function Footer() {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <HeadphonesIcon sx={{ color: '#1DB954', mr: 1, fontSize: '1.2rem' }} />
                     <Link
-                      href="#/support"
+                      href="/contact"
                       underline="none"
                       sx={{
                         color: '#B3B3B3',
@@ -632,8 +632,8 @@ function Footer() {
               }}
             >
               {[
-                { name: 'Privacy Policy', path: '/privacy' },
-                { name: 'Terms of Use', path: '/terms' },
+                { name: 'Privacy Policy', path: '/privacy-policy' },
+                { name: 'Terms of Use', path: '/terms-of-service' },
               ].map((item) => (
                 <Link
                   key={item.name}

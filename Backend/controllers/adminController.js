@@ -1,7 +1,17 @@
 const User = require('../models/User.js');
 const Song = require('../models/Song.js');
+const Playlist = require('../models/Playlist.js');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+// TEMPORARY SOLUTION - REMOVE BEFORE PRODUCTION
+cloudinary.config({
+  cloud_name: "dauh5uusc",
+  api_key: "665827431275633",
+  api_secret: "jfWbBiYmdpX8116P608EUBtYwG4"
+});
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -29,14 +39,14 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: user
@@ -56,20 +66,20 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, email, role } = req.body;
-    
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { name, email, role },
       { new: true, runValidators: true }
     ).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: user
@@ -89,14 +99,14 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: {}
@@ -116,7 +126,7 @@ const deleteUser = async (req, res) => {
 const getAllSongs = async (req, res) => {
   try {
     const songs = await Song.find().populate('createdBy', 'name email');
-    
+
     res.status(200).json({
       success: true,
       count: songs.length,
@@ -137,14 +147,14 @@ const getAllSongs = async (req, res) => {
 const getSongById = async (req, res) => {
   try {
     const song = await Song.findById(req.params.id).populate('createdBy', 'name email');
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
         message: 'Song not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: song
@@ -169,63 +179,77 @@ const uploadSong = async (req, res) => {
         message: 'Please upload audio file and cover image'
       });
     }
-    
+
     const { audioFile, coverImage } = req.files;
     const { title, artist, album, genre, releaseYear, duration } = req.body;
-    
+
     // Check file types
     const allowedAudioTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav'];
     const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    
+
     if (!allowedAudioTypes.includes(audioFile.mimetype)) {
       return res.status(400).json({
         success: false,
         message: 'Please upload a valid audio file (MP3 or WAV)'
       });
     }
-    
+
     if (!allowedImageTypes.includes(coverImage.mimetype)) {
       return res.status(400).json({
         success: false,
         message: 'Please upload a valid image file (JPEG, JPG or PNG)'
       });
     }
-    
-    // Create unique filenames
-    const audioFileName = `song_${Date.now()}_${path.parse(audioFile.name).name}${path.parse(audioFile.name).ext}`;
-    const imageFileName = `cover_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
-    
-    // Define paths for storage - directly in Backend/uploads
-    const uploadsDir = path.join(__dirname, '../uploads');
-    const musicDir = path.join(uploadsDir, 'music');
-    const coversDir = path.join(uploadsDir, 'covers');
-    
-    // Create directories if they don't exist
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-    if (!fs.existsSync(musicDir)) {
-      fs.mkdirSync(musicDir, { recursive: true });
-    }
-    if (!fs.existsSync(coversDir)) {
-      fs.mkdirSync(coversDir, { recursive: true });
-    }
-    
-    const audioPath = path.join(musicDir, audioFileName);
-    const imagePath = path.join(coversDir, imageFileName);
-    
-    console.log('Saving audio to:', audioPath);
-    console.log('Saving image to:', imagePath);
-    
-    // Move files
-    await audioFile.mv(audioPath);
-    await coverImage.mv(imagePath);
-    
-    // Define URL paths with server URL for database
-    const serverBaseUrl = process.env.SERVER_URL || 'http://localhost:5000';
-    const audioFileUrl = `${serverBaseUrl}/uploads/music/${audioFileName}`;
-    const imageFileUrl = `${serverBaseUrl}/uploads/covers/${imageFileName}`;
-    
+
+    // Debug log the file objects (without data) to see what we're working with
+    console.log('Audio file object:', { ...audioFile, data: 'Buffer data not shown' });
+    console.log('Cover image object:', { ...coverImage, data: 'Buffer data not shown' });
+
+    // Upload audio file to Cloudinary using buffer data
+    const audioResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: 'auto',
+          folder: 'melodyhub/music',
+          public_id: `song_${Date.now()}_${path.parse(audioFile.name).name}`,
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary audio upload error:', error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+
+      uploadStream.end(audioFile.data);
+    });
+
+    console.log('Audio uploaded successfully:', audioResult.secure_url);
+
+    // Upload cover image to Cloudinary using buffer data
+    const imageResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'melodyhub/covers',
+          public_id: `cover_${Date.now()}_${path.parse(coverImage.name).name}`,
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary image upload error:', error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+
+      uploadStream.end(coverImage.data);
+    });
+
+    console.log('Image uploaded successfully:', imageResult.secure_url);
+
     // Create song in database
     const song = await Song.create({
       title,
@@ -234,11 +258,13 @@ const uploadSong = async (req, res) => {
       genre,
       releaseYear: parseInt(releaseYear),
       duration: parseInt(duration),
-      coverImage: imageFileUrl,
-      audioFile: audioFileUrl,
+      coverImage: imageResult.secure_url,
+      audioFile: audioResult.secure_url,
+      cloudinaryImageId: imageResult.public_id,
+      cloudinaryAudioId: audioResult.public_id,
       createdBy: req.user.id
     });
-    
+
     res.status(201).json({
       success: true,
       data: song
@@ -247,28 +273,27 @@ const uploadSong = async (req, res) => {
     console.error('Error uploading song:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: error.message || 'Server Error'
     });
   }
 };
-
 // @desc    Update song
 // @route   PUT /api/admin/songs/:id
 // @access  Private/Admin
 const updateSong = async (req, res) => {
   try {
     let song = await Song.findById(req.params.id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
         message: 'Song not found'
       });
     }
-    
+
     // Update basic song details
     const { title, artist, album, genre, releaseYear, isPublic } = req.body;
-    
+
     const updatedSongData = {
       title: title || song.title,
       artist: artist || song.artist,
@@ -277,66 +302,111 @@ const updateSong = async (req, res) => {
       releaseYear: releaseYear ? parseInt(releaseYear) : song.releaseYear,
       isPublic: isPublic !== undefined ? isPublic : song.isPublic
     };
-    
+
     // Handle cover image update if provided
     if (req.files && req.files.coverImage) {
       const coverImage = req.files.coverImage;
       const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      
+
       if (!allowedImageTypes.includes(coverImage.mimetype)) {
         return res.status(400).json({
           success: false,
           message: 'Please upload a valid image file (JPEG, JPG or PNG)'
         });
       }
-      
-      // Create unique filename
-      const imageFileName = `cover_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
-      
-      // Define paths for storage - directly in Backend/uploads
-      const uploadsDir = path.join(__dirname, '../uploads');
-      const coversDir = path.join(uploadsDir, 'covers');
-      
-      // Create directories if they don't exist
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      if (!fs.existsSync(coversDir)) {
-        fs.mkdirSync(coversDir, { recursive: true });
-      }
-      
-      const imagePath = path.join(coversDir, imageFileName);
-      console.log('Saving updated image to:', imagePath);
-      
-      // Move file
-      await coverImage.mv(imagePath);
-      
-      // Define URL path with server URL for database
-      const serverBaseUrl = process.env.SERVER_URL || 'http://localhost:5000';
-      const imageFileUrl = `${serverBaseUrl}/uploads/covers/${imageFileName}`;
-      updatedSongData.coverImage = imageFileUrl;
-      
-      // Delete old cover image if it exists and isn't the default
-      if (!song.coverImage.includes('default-cover.jpg')) {
-        try {
-          const oldImagePath = path.join(__dirname, '..', song.coverImage.replace(/^\//, ''));
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-            console.log('Deleted old image:', oldImagePath);
+
+      // Upload new cover image to Cloudinary using streaming upload
+      const imageResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'melodyhub/covers',
+            public_id: `cover_${Date.now()}_${path.parse(coverImage.name).name}`,
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary image upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
           }
+        );
+
+        uploadStream.end(coverImage.data);
+      });
+
+      console.log('Cover image uploaded successfully:', imageResult.secure_url);
+
+      // Delete old cover image from Cloudinary if it exists
+      if (song.cloudinaryImageId) {
+        try {
+          await cloudinary.uploader.destroy(song.cloudinaryImageId);
         } catch (err) {
-          console.error('Error deleting old image:', err);
+          console.error('Error deleting old image from Cloudinary:', err);
         }
       }
+
+      // Update cover image path
+      updatedSongData.coverImage = imageResult.secure_url;
+      updatedSongData.cloudinaryImageId = imageResult.public_id;
     }
-    
+
+    // Handle audio file update if provided
+    if (req.files && req.files.audioFile) {
+      const audioFile = req.files.audioFile;
+      const allowedAudioTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav'];
+
+      if (!allowedAudioTypes.includes(audioFile.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please upload a valid audio file (MP3 or WAV)'
+        });
+      }
+
+      // Upload new audio file to Cloudinary using streaming upload
+      const audioResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: 'auto',
+            folder: 'melodyhub/music',
+            public_id: `song_${Date.now()}_${path.parse(audioFile.name).name}`,
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary audio upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        uploadStream.end(audioFile.data);
+      });
+
+      console.log('Audio file uploaded successfully:', audioResult.secure_url);
+
+      // Delete old audio file from Cloudinary if it exists
+      if (song.cloudinaryAudioId) {
+        try {
+          await cloudinary.uploader.destroy(song.cloudinaryAudioId, { resource_type: 'video' });
+        } catch (err) {
+          console.error('Error deleting old audio from Cloudinary:', err);
+        }
+      }
+
+      // Update audio file path
+      updatedSongData.audioFile = audioResult.secure_url;
+      updatedSongData.cloudinaryAudioId = audioResult.public_id;
+    }
+
     // Update song in database
     song = await Song.findByIdAndUpdate(
       req.params.id,
       updatedSongData,
       { new: true, runValidators: true }
     );
-    
+
     res.status(200).json({
       success: true,
       data: song
@@ -345,48 +415,44 @@ const updateSong = async (req, res) => {
     console.error('Error updating song:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: error.message || 'Server Error'
     });
   }
 };
-
 // @desc    Delete song
 // @route   DELETE /api/admin/songs/:id
 // @access  Private/Admin
 const deleteSong = async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
-    
+
     if (!song) {
       return res.status(404).json({
         success: false,
         message: 'Song not found'
       });
     }
-    
-    // Construct full file system paths using the paths stored in database
-    const audioPath = path.join(__dirname, '..', song.audioFile.replace(/^\//, ''));
-    const imagePath = path.join(__dirname, '..', song.coverImage.replace(/^\//, ''));
-    
-    console.log('Deleting audio file:', audioPath);
-    console.log('Deleting image file:', imagePath);
-    
-    // Delete the files if they exist
-    try {
-      if (fs.existsSync(audioPath)) {
-        fs.unlinkSync(audioPath);
+
+    // Delete files from Cloudinary if they exist
+    if (song.cloudinaryImageId) {
+      try {
+        await cloudinary.uploader.destroy(song.cloudinaryImageId);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
       }
-      
-      if (fs.existsSync(imagePath) && !imagePath.includes('default-cover.jpg')) {
-        fs.unlinkSync(imagePath);
-      }
-    } catch (err) {
-      console.error('Error deleting files:', err);
     }
-    
+
+    if (song.cloudinaryAudioId) {
+      try {
+        await cloudinary.uploader.destroy(song.cloudinaryAudioId, { resource_type: 'video' });
+      } catch (err) {
+        console.error('Error deleting audio from Cloudinary:', err);
+      }
+    }
+
     // Delete song from database
     await Song.findByIdAndDelete(req.params.id);
-    
+
     res.status(200).json({
       success: true,
       data: {}
@@ -407,12 +473,12 @@ const getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalSongs = await Song.countDocuments();
-    
+
     // Get user registrations by date (last 7 days)
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 7);
-    
+
     const userRegistrations = await User.aggregate([
       {
         $match: {
@@ -427,7 +493,7 @@ const getDashboardStats = async (req, res) => {
       },
       { $sort: { _id: 1 } }
     ]);
-    
+
     // Get songs by genre
     const songsByGenre = await Song.aggregate([
       {
@@ -438,7 +504,7 @@ const getDashboardStats = async (req, res) => {
       },
       { $sort: { count: -1 } }
     ]);
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -457,9 +523,6 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-// Import Playlist model
-const Playlist = require('../models/Playlist.js');
-
 // @desc    Get all playlists
 // @route   GET /api/admin/playlists
 // @access  Private/Admin
@@ -474,7 +537,7 @@ const getAllPlaylists = async (req, res) => {
         path: 'createdBy',
         select: 'name email'
       });
-    
+
     res.status(200).json({
       success: true,
       count: playlists.length,
@@ -503,14 +566,14 @@ const getPlaylistById = async (req, res) => {
         path: 'createdBy',
         select: 'name email'
       });
-    
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
         message: 'Playlist not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: playlist
@@ -530,7 +593,7 @@ const getPlaylistById = async (req, res) => {
 const createPlaylist = async (req, res) => {
   try {
     const { name, description, isDefault, isPublic } = req.body;
-    
+
     // Create playlist data
     const playlistData = {
       name,
@@ -540,11 +603,11 @@ const createPlaylist = async (req, res) => {
       songs: [],
       createdBy: req.user.id
     };
-    
+
     // Handle cover image upload if provided
     if (req.files && req.files.coverImage) {
       const coverImage = req.files.coverImage;
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(coverImage.mimetype)) {
@@ -553,38 +616,35 @@ const createPlaylist = async (req, res) => {
           message: 'Please upload a valid image file (JPEG, JPG or PNG)'
         });
       }
-      
-      // Create unique filename
-      const fileName = `playlist_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
-      
-      // Define paths for storage - directly in Backend/uploads
-      const uploadsDir = path.join(__dirname, '../uploads');
-      const playlistsDir = path.join(uploadsDir, 'playlists');
-      
-      // Create directories if they don't exist
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      if (!fs.existsSync(playlistsDir)) {
-        fs.mkdirSync(playlistsDir, { recursive: true });
-      }
-      
-      const imagePath = path.join(playlistsDir, fileName);
-      
-      // Move file
-      await coverImage.mv(imagePath);
-      
-      // Define URL path with server URL for database
-      const serverBaseUrl = process.env.SERVER_URL || 'http://localhost:5000';
-      const imageFileUrl = `${serverBaseUrl}/uploads/playlists/${fileName}`;
-      
-      // Update cover image path
-      playlistData.coverImage = imageFileUrl;
+
+      // Upload cover image to Cloudinary using buffer data
+      const imageResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'melodyhub/playlists',
+            public_id: `playlist_${Date.now()}_${path.parse(coverImage.name).name}`,
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary image upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        uploadStream.end(coverImage.data);
+      });
+
+      // Update playlist data with Cloudinary URL
+      playlistData.coverImage = imageResult.secure_url;
+      playlistData.cloudinaryImageId = imageResult.public_id;
     }
-    
+
     // Create playlist in database
     const playlist = await Playlist.create(playlistData);
-    
+
     res.status(201).json({
       success: true,
       data: playlist
@@ -593,27 +653,26 @@ const createPlaylist = async (req, res) => {
     console.error('Error creating playlist:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: error.message || 'Server Error'
     });
   }
 };
-
 // @desc    Update a playlist
 // @route   PUT /api/admin/playlists/:id
 // @access  Private/Admin
 const updatePlaylist = async (req, res) => {
   try {
     const { name, description, isDefault, isPublic } = req.body;
-    
+
     let playlist = await Playlist.findById(req.params.id);
-    
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
         message: 'Playlist not found'
       });
     }
-    
+
     // Update playlist data
     const playlistData = {
       name: name || playlist.name,
@@ -621,11 +680,11 @@ const updatePlaylist = async (req, res) => {
       isDefault: isDefault !== undefined ? (isDefault === 'true' || isDefault === true) : playlist.isDefault,
       isPublic: isPublic !== undefined ? (isPublic === 'true' || isPublic === true) : playlist.isPublic
     };
-    
+
     // Handle cover image upload if provided
     if (req.files && req.files.coverImage) {
       const coverImage = req.files.coverImage;
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(coverImage.mimetype)) {
@@ -634,46 +693,51 @@ const updatePlaylist = async (req, res) => {
           message: 'Please upload a valid image file (JPEG, JPG or PNG)'
         });
       }
-      
-      // Create unique filename
-      const fileName = `playlist_${Date.now()}_${path.parse(coverImage.name).name}${path.parse(coverImage.name).ext}`;
-      
-      // Define paths for storage - directly in Backend/uploads
-      const uploadsDir = path.join(__dirname, '../uploads');
-      const playlistsDir = path.join(uploadsDir, 'playlists');
-      
-      // Create directories if they don't exist
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      if (!fs.existsSync(playlistsDir)) {
-        fs.mkdirSync(playlistsDir, { recursive: true });
-      }
-      
-      const imagePath = path.join(playlistsDir, fileName);
-      
-      // Move file
-      await coverImage.mv(imagePath);
-      
-      // Delete old cover image if it exists and isn't the default
-      if (playlist.coverImage !== 'default-playlist.jpg') {
-        const oldImagePath = path.join(__dirname, '../../public', playlist.coverImage);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+
+      // Upload cover image to Cloudinary using streaming upload
+      const imageResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'melodyhub/playlists',
+            public_id: `playlist_${Date.now()}_${path.parse(coverImage.name).name}`,
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary image upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        uploadStream.end(coverImage.data);
+      });
+
+      console.log('Playlist cover image uploaded successfully:', imageResult.secure_url);
+
+      // Delete old cover image from Cloudinary if it exists
+      if (playlist.cloudinaryImageId) {
+        try {
+          await cloudinary.uploader.destroy(playlist.cloudinaryImageId);
+          console.log('Old playlist cover image deleted from Cloudinary');
+        } catch (err) {
+          console.error('Error deleting old image from Cloudinary:', err);
         }
       }
-      
-      // Update cover image path
-      playlistData.coverImage = `/uploads/playlists/${fileName}`;
+
+      // Update playlist data with Cloudinary URL
+      playlistData.coverImage = imageResult.secure_url;
+      playlistData.cloudinaryImageId = imageResult.public_id;
     }
-    
+
     // Update playlist in database
     playlist = await Playlist.findByIdAndUpdate(
       req.params.id,
       playlistData,
       { new: true, runValidators: true }
     );
-    
+
     res.status(200).json({
       success: true,
       data: playlist
@@ -682,27 +746,26 @@ const updatePlaylist = async (req, res) => {
     console.error('Error updating playlist:', error);
     res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: error.message || 'Server Error'
     });
   }
 };
-
 // @desc    Add song to playlist
 // @route   PUT /api/admin/playlists/:id/songs/:songId
 // @access  Private/Admin
 const addSongToPlaylist = async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
         message: 'Playlist not found'
       });
     }
-    
+
     const songId = req.params.songId;
-    
+
     // Check if song already exists in playlist
     if (playlist.songs.includes(songId)) {
       return res.status(400).json({
@@ -710,11 +773,11 @@ const addSongToPlaylist = async (req, res) => {
         message: 'Song already in playlist'
       });
     }
-    
+
     // Add song to playlist
     playlist.songs.push(songId);
     await playlist.save();
-    
+
     res.status(200).json({
       success: true,
       data: playlist
@@ -734,30 +797,30 @@ const addSongToPlaylist = async (req, res) => {
 const removeSongFromPlaylist = async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
         message: 'Playlist not found'
       });
     }
-    
+
     const songId = req.params.songId;
-    
+
     // Check if song exists in playlist
     const songIndex = playlist.songs.indexOf(songId);
-    
+
     if (songIndex === -1) {
       return res.status(400).json({
         success: false,
         message: 'Song not found in playlist'
       });
     }
-    
+
     // Remove song from playlist
     playlist.songs.splice(songIndex, 1);
     await playlist.save();
-    
+
     res.status(200).json({
       success: true,
       data: playlist
@@ -777,25 +840,26 @@ const removeSongFromPlaylist = async (req, res) => {
 const deletePlaylist = async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
         message: 'Playlist not found'
       });
     }
-    
-    // Delete cover image if it exists and isn't the default
-    if (playlist.coverImage !== 'default-playlist.jpg') {
-      const imagePath = path.join(__dirname, '../../public', playlist.coverImage);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+
+    // Delete cover image from Cloudinary if it exists
+    if (playlist.cloudinaryImageId) {
+      try {
+        await cloudinary.uploader.destroy(playlist.cloudinaryImageId);
+      } catch (err) {
+        console.error('Error deleting image from Cloudinary:', err);
       }
     }
-    
+
     // Delete playlist from database
     await Playlist.findByIdAndDelete(req.params.id);
-    
+
     res.status(200).json({
       success: true,
       data: {}

@@ -57,7 +57,8 @@ import {
   RepeatOne,
   Shuffle,
   LibraryMusic,
-  Close
+  Close,
+  ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -223,6 +224,7 @@ function UserDashboard() {
       // Get songs
       const songsRes = await api.get('/user/songs');
       setSongs(songsRes.data.data);
+      // console.log('Songs:', songsRes.data.data);
 
       // Get playlists
       const playlistsRes = await api.get('/user/playlists');
@@ -486,7 +488,7 @@ function UserDashboard() {
 
       // Add new playlist to state
       setPlaylists([...playlists, res.data.data]);
-      
+
       enqueueSnackbar('Playlist created successfully', { variant: 'success' });
 
       // Close dialog
@@ -577,6 +579,12 @@ function UserDashboard() {
 
   // Render song card
   const renderSongCard = (song) => {
+    // Add null check for song
+    if (!song) return null;
+
+    // Use default image if coverImage is missing
+    const defaultCoverImage = '/default-cover.jpg'; // Default cover image path
+
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} key={song._id}>
         <SongCard>
@@ -584,8 +592,8 @@ function UserDashboard() {
             <CardMedia
               component="img"
               height="160"
-              image={song.coverImage}
-              alt={song.title}
+              image={song.coverImage || defaultCoverImage}
+              alt={song.title || 'Unknown Song'}
               sx={{ cursor: 'pointer' }}
               onClick={() => playSong(song)}
             />
@@ -608,10 +616,10 @@ function UserDashboard() {
           </Box>
           <CardContent>
             <Typography gutterBottom variant="h6" component="div" noWrap>
-              {song.title}
+              {song.title || 'Unknown Title'}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {song.artist}
+              {song.artist || 'Unknown Artist'}
             </Typography>
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
@@ -659,6 +667,11 @@ function UserDashboard() {
     );
   };
 
+  // Handle back button
+  const handleBack = () => {
+    navigate('/');
+  };
+
   return (
     <Box sx={{
       backgroundColor: '#121212',
@@ -671,7 +684,7 @@ function UserDashboard() {
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ pt: 4 }}>
         {/* Search Bar */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4 , mt: 6}}>
           <TextField
             fullWidth
             placeholder="Search for songs, artists or albums..."
@@ -751,6 +764,23 @@ function UserDashboard() {
               // Main Content
               <Box>
                 {/* Tabs */}
+                <Button
+                  startIcon={<ArrowBackIcon />}
+                  onClick={handleBack}
+                  sx={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 20,
+                    color: '#fff',
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)'
+                    }
+                  }}
+                >
+                  Back to Home
+                </Button>
                 <Tabs
                   value={currentTab}
                   onChange={handleTabChange}
@@ -783,7 +813,7 @@ function UserDashboard() {
                           Recently Played
                         </Typography>
                         <Grid container spacing={3}>
-                          {recentlyPlayed.slice(0, 4).map(song => renderSongCard(song))}
+                          {recentlyPlayed.filter(song => song).map(song => renderSongCard(song))}
                         </Grid>
                       </Box>
                     )}

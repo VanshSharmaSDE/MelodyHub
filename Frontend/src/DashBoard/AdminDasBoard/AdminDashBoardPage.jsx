@@ -78,6 +78,8 @@ function AdminDashboard() {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [songForm, setSongForm] = useState({
     title: '',
@@ -268,6 +270,18 @@ function AdminDashboard() {
   const handleSubmitSong = async (e) => {
     e.preventDefault();
 
+    // Start loading state
+    setUploadingFile(true);
+    setUploadProgress(0);
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        return newProgress >= 90 ? 90 : newProgress;
+      });
+    }, 500);
+
     // Create FormData object to send files
     const formData = new FormData();
     Object.keys(songForm).forEach(key => {
@@ -297,11 +311,22 @@ function AdminDashboard() {
         fetchSongs();
       }
 
-      // Close dialog
-      setOpenSongDialog(false);
+      // Complete progress
+      setUploadProgress(100);
+      setTimeout(() => {
+        // Close dialog
+        setOpenSongDialog(false);
+        setUploadingFile(false);
+        setUploadProgress(0);
+      }, 500);
+
     } catch (err) {
       console.error('Error submitting song:', err);
       setError(err.response?.data?.message || 'Failed to save song');
+      setUploadingFile(false);
+      setUploadProgress(0);
+    } finally {
+      clearInterval(progressInterval);
     }
   };
 
@@ -372,6 +397,18 @@ function AdminDashboard() {
   const handleSubmitPlaylist = async (e) => {
     e.preventDefault();
 
+    // Start loading state
+    setUploadingFile(true);
+    setUploadProgress(0);
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        return newProgress >= 90 ? 90 : newProgress;
+      });
+    }, 500);
+
     // Create FormData object to send files
     const formData = new FormData();
     Object.keys(playlistForm).forEach(key => {
@@ -416,11 +453,22 @@ function AdminDashboard() {
       // Refresh playlists list
       fetchPlaylists();
 
-      // Close dialog
-      setOpenPlaylistDialog(false);
+      // Complete progress
+      setUploadProgress(100);
+      setTimeout(() => {
+        // Close dialog
+        setOpenPlaylistDialog(false);
+        setUploadingFile(false);
+        setUploadProgress(0);
+      }, 500);
+
     } catch (err) {
       console.error('Error submitting playlist:', err);
       setError(err.response?.data?.message || 'Failed to save playlist');
+      setUploadingFile(false);
+      setUploadProgress(0);
+    } finally {
+      clearInterval(progressInterval);
     }
   };
 
@@ -935,7 +983,7 @@ function AdminDashboard() {
       {/* Improved Song Dialog */}
       <Dialog
         open={openSongDialog}
-        onClose={() => setOpenSongDialog(false)}
+        onClose={() => !uploadingFile && setOpenSongDialog(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{
@@ -959,7 +1007,7 @@ function AdminDashboard() {
           {selectedSong ? 'Edit Song' : 'Add New Song'}
         </DialogTitle>
 
-        <DialogContent sx={{ py: 3 }}>
+        <DialogContent sx={{ py: 3, position: 'relative' }}>
           <Grid container spacing={3}>
             {/* Left column - Cover Image and Audio File */}
             <Grid item xs={12} md={4}>
@@ -998,6 +1046,7 @@ function AdminDashboard() {
                   <Button
                     variant="contained"
                     component="label"
+                    disabled={uploadingFile}
                     sx={{
                       position: 'absolute',
                       bottom: 0,
@@ -1017,6 +1066,7 @@ function AdminDashboard() {
                       name="coverImage"
                       onChange={handleSongFormChange}
                       hidden
+                      disabled={uploadingFile}
                     />
                   </Button>
                 </Box>
@@ -1043,6 +1093,7 @@ function AdminDashboard() {
                     variant="outlined"
                     component="label"
                     startIcon={<AudioFileIcon />}
+                    disabled={uploadingFile}
                     fullWidth
                     sx={{
                       mt: 1,
@@ -1061,6 +1112,7 @@ function AdminDashboard() {
                       name="audioFile"
                       onChange={handleSongFormChange}
                       hidden
+                      disabled={uploadingFile}
                     />
                   </Button>
                 </Box>
@@ -1079,6 +1131,7 @@ function AdminDashboard() {
                     value={songForm.title}
                     onChange={handleSongFormChange}
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputLabelProps={{ sx: { color: '#b3b3b3' } }}
                     InputProps={{ sx: { color: '#fff' } }}
                     sx={{
@@ -1099,6 +1152,7 @@ function AdminDashboard() {
                     value={songForm.artist}
                     onChange={handleSongFormChange}
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputLabelProps={{ sx: { color: '#b3b3b3' } }}
                     InputProps={{ sx: { color: '#fff' } }}
                     sx={{
@@ -1118,6 +1172,7 @@ function AdminDashboard() {
                     value={songForm.album}
                     onChange={handleSongFormChange}
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputLabelProps={{ sx: { color: '#b3b3b3' } }}
                     InputProps={{ sx: { color: '#fff' } }}
                     sx={{
@@ -1130,7 +1185,7 @@ function AdminDashboard() {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth variant="outlined">
+                  <FormControl fullWidth variant="outlined" disabled={uploadingFile}>
                     <InputLabel sx={{ color: '#b3b3b3' }}>Genre</InputLabel>
                     <Select
                       name="genre"
@@ -1170,6 +1225,7 @@ function AdminDashboard() {
                     onChange={handleSongFormChange}
                     type="number"
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputProps={{
                       inputProps: { min: 1900, max: new Date().getFullYear() },
                       sx: { color: '#fff' }
@@ -1194,6 +1250,7 @@ function AdminDashboard() {
                     onChange={handleSongFormChange}
                     type="number"
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputProps={{
                       inputProps: { min: 1 },
                       sx: { color: '#fff' }
@@ -1229,6 +1286,48 @@ function AdminDashboard() {
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Upload Progress Overlay */}
+          {uploadingFile && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                borderRadius: '0 0 4px 4px',
+              }}
+            >
+              <CircularProgress
+                size={80}
+                color="primary"
+                variant="determinate"
+                value={uploadProgress}
+              />
+              <Typography
+                variant="h6"
+                sx={{ color: '#fff', mt: 2 }}
+              >
+                {`Uploading... ${Math.round(uploadProgress)}%`}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: '#b3b3b3', mt: 1, textAlign: 'center', maxWidth: '80%' }}
+              >
+                {uploadProgress < 100
+                  ? 'Please wait while your file is being uploaded to the cloud. This may take a moment depending on file size.'
+                  : 'Upload complete! Processing...'
+                }
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
 
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
@@ -1237,6 +1336,7 @@ function AdminDashboard() {
           <Button
             onClick={() => setOpenSongDialog(false)}
             variant="text"
+            disabled={uploadingFile}
             sx={{
               color: '#b3b3b3',
               '&:hover': {
@@ -1247,27 +1347,44 @@ function AdminDashboard() {
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmitSong}
-            variant="contained"
-            color="primary"
-            disabled={!songForm.title || !songForm.artist || (!songForm.audioFile && !selectedSong)}
-            sx={{
-              px: 3,
-              borderRadius: 2,
-              fontWeight: 'medium',
-              boxShadow: 2
-            }}
-          >
-            {selectedSong ? 'Update Song' : 'Upload Song'}
-          </Button>
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <Button
+              onClick={handleSubmitSong}
+              variant="contained"
+              color="primary"
+              disabled={!songForm.title || !songForm.artist || (!songForm.audioFile && !selectedSong) || uploadingFile}
+              sx={{
+                px: 3,
+                borderRadius: 2,
+                fontWeight: 'medium',
+                boxShadow: 2
+              }}
+            >
+              {uploadingFile ? 'Uploading...' : selectedSong ? 'Update Song' : 'Upload Song'}
+            </Button>
+            {uploadingFile && (
+              <CircularProgress
+                size={24}
+                color="primary"
+                variant="determinate"
+                value={uploadProgress}
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: -40,
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
 
       {/* Playlist Dialog */}
       <Dialog
         open={openPlaylistDialog}
-        onClose={() => setOpenPlaylistDialog(false)}
+        onClose={() => !uploadingFile && setOpenPlaylistDialog(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{
@@ -1291,7 +1408,7 @@ function AdminDashboard() {
           {selectedPlaylist ? 'Edit Playlist' : 'Create New Playlist'}
         </DialogTitle>
 
-        <DialogContent sx={{ py: 3 }}>
+        <DialogContent sx={{ py: 3, position: 'relative' }}>
           <Grid container spacing={3}>
             {/* Left column - Cover Image and settings */}
             <Grid item xs={12} md={4}>
@@ -1337,6 +1454,7 @@ function AdminDashboard() {
                   <Button
                     variant="contained"
                     component="label"
+                    disabled={uploadingFile}
                     sx={{
                       position: 'absolute',
                       bottom: 0,
@@ -1356,6 +1474,7 @@ function AdminDashboard() {
                       name="coverImage"
                       onChange={handlePlaylistFormChange}
                       hidden
+                      disabled={uploadingFile}
                     />
                   </Button>
                 </Box>
@@ -1372,6 +1491,7 @@ function AdminDashboard() {
                         onChange={handlePlaylistFormChange}
                         name="isDefault"
                         color="primary"
+                        disabled={uploadingFile}
                       />
                     }
                     label={
@@ -1391,6 +1511,7 @@ function AdminDashboard() {
                         onChange={handlePlaylistFormChange}
                         name="isPublic"
                         color="primary"
+                        disabled={uploadingFile}
                       />
                     }
                     label={
@@ -1418,6 +1539,7 @@ function AdminDashboard() {
                     value={playlistForm.name}
                     onChange={handlePlaylistFormChange}
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputLabelProps={{ sx: { color: '#b3b3b3' } }}
                     InputProps={{ sx: { color: '#fff' } }}
                     sx={{
@@ -1440,6 +1562,7 @@ function AdminDashboard() {
                     multiline
                     rows={3}
                     variant="outlined"
+                    disabled={uploadingFile}
                     InputLabelProps={{ sx: { color: '#b3b3b3' } }}
                     InputProps={{ sx: { color: '#fff' } }}
                     sx={{
@@ -1466,6 +1589,7 @@ function AdminDashboard() {
                       variant="outlined"
                       startIcon={<AddIcon />}
                       onClick={handleOpenSongSelection}
+                      disabled={uploadingFile}
                       sx={{
                         borderColor: '#1DB954',
                         color: '#1DB954',
@@ -1553,6 +1677,7 @@ function AdminDashboard() {
                                   edge="end"
                                   size="small"
                                   onClick={() => handleSongSelectionChange(song._id)}
+                                  disabled={uploadingFile}
                                 >
                                   <RemoveCircleIcon sx={{ color: '#ff5252' }} />
                                 </IconButton>
@@ -1567,6 +1692,48 @@ function AdminDashboard() {
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Upload Progress Overlay */}
+          {uploadingFile && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                borderRadius: '0 0 4px 4px',
+              }}
+            >
+              <CircularProgress
+                size={80}
+                color="primary"
+                variant="determinate"
+                value={uploadProgress}
+              />
+              <Typography
+                variant="h6"
+                sx={{ color: '#fff', mt: 2 }}
+              >
+                {`Uploading... ${Math.round(uploadProgress)}%`}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: '#b3b3b3', mt: 1, textAlign: 'center', maxWidth: '80%' }}
+              >
+                {uploadProgress < 100
+                  ? 'Please wait while your file is being uploaded to the cloud. This may take a moment depending on file size.'
+                  : 'Upload complete! Processing...'
+                }
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
 
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
@@ -1575,6 +1742,7 @@ function AdminDashboard() {
           <Button
             onClick={() => setOpenPlaylistDialog(false)}
             variant="text"
+            disabled={uploadingFile}
             sx={{
               color: '#b3b3b3',
               '&:hover': {
@@ -1585,27 +1753,44 @@ function AdminDashboard() {
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmitPlaylist}
-            variant="contained"
-            color="primary"
-            disabled={!playlistForm.name}
-            sx={{
-              px: 3,
-              borderRadius: 2,
-              fontWeight: 'medium',
-              boxShadow: 2
-            }}
-          >
-            {selectedPlaylist ? 'Update Playlist' : 'Create Playlist'}
-          </Button>
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <Button
+              onClick={handleSubmitPlaylist}
+              variant="contained"
+              color="primary"
+              disabled={!playlistForm.name || uploadingFile}
+              sx={{
+                px: 3,
+                borderRadius: 2,
+                fontWeight: 'medium',
+                boxShadow: 2
+              }}
+            >
+              {uploadingFile ? 'Uploading...' : selectedPlaylist ? 'Update Playlist' : 'Create Playlist'}
+            </Button>
+            {uploadingFile && (
+              <CircularProgress
+                size={24}
+                color="primary"
+                variant="determinate"
+                value={uploadProgress}
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: -40,
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
 
       {/* Song Selection Dialog for Playlists */}
       <Dialog
         open={openSongSelectionDialog}
-        onClose={() => setOpenSongSelectionDialog(false)}
+        onClose={() => !uploadingFile && setOpenSongSelectionDialog(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{
@@ -1688,6 +1873,7 @@ function AdminDashboard() {
                         edge="end"
                         checked={isSelected}
                         onChange={() => handleSongSelectionChange(song._id)}
+                        disabled={uploadingFile}
                         sx={{
                           color: '#666',
                           '&.Mui-checked': {
@@ -1715,6 +1901,7 @@ function AdminDashboard() {
             <Button
               onClick={() => setOpenSongSelectionDialog(false)}
               variant="text"
+              disabled={uploadingFile}
               sx={{
                 mr: 1,
                 color: '#b3b3b3',
@@ -1730,6 +1917,7 @@ function AdminDashboard() {
               onClick={() => setOpenSongSelectionDialog(false)}
               variant="contained"
               color="primary"
+              disabled={uploadingFile}
               sx={{
                 px: 3,
                 borderRadius: 2,

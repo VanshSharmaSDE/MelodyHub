@@ -15,6 +15,9 @@ import AdminDashboard from './DashBoard/AdminDasBoard/AdminDashBoardPage';
 import NotFound from './Pages/NotFound/404';
 import UnderDevelopment from './Pages/NotFound/UnderDevelopment';
 import Unauthorized from './Pages/NotFound/Unauthorize';
+import PrivacyPolicy from './Pages/Privacy&Terms/PrivacyPolicy';
+import TermsOfService from './Pages/Privacy&Terms/TermsOfService';
+import ContactUs from './Pages/Acessability/Contact';
 import { setAuthToken } from './utils/auth';
 import { MusicProvider } from './context/MusicContext';
 import MusicPlayer from './components/MusicPlayer';
@@ -42,6 +45,9 @@ function App() {
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/contact" element={<ContactUs />} />
 
                   {/* Protected routes */}
                   <Route path="/player" element={

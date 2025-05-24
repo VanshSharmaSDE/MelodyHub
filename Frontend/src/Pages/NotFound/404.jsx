@@ -68,7 +68,7 @@ function NotFound() {
                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
               }}
             >
-              MUSIC<span style={{ color: '#1DB954' }}>IFY</span>
+              MELODY<span style={{ color: '#1DB954' }}>HUB</span>
             </Typography>
           </Box>
           

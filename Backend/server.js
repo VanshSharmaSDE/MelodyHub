@@ -38,6 +38,15 @@ app.use('/api/public', playlistRoutes);
 // Special route for serving uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// In your app.js or server.js
+const fileUpload = require('express-fileupload');
+
+// Add this before your routes
+app.use(fileUpload({
+  useTempFiles: false, // Set this to false since we're using the buffer directly
+  limits: { fileSize: 50 * 1024 * 1024 }, // Limit file size to 50MB for audio files
+}));
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });

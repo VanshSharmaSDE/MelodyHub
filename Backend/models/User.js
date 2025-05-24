@@ -28,7 +28,8 @@ const PlaylistSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  cloudinaryImageId: { type: String },
 });
 
 const UserSchema = new mongoose.Schema({
