@@ -18,7 +18,10 @@ import Unauthorized from './Pages/NotFound/Unauthorize';
 import PrivacyPolicy from './Pages/Privacy&Terms/PrivacyPolicy';
 import TermsOfService from './Pages/Privacy&Terms/TermsOfService';
 import ContactUs from './Pages/Acessability/Contact';
+import Pricing from './Pages/Acessability/Pricing'; 
+import ChatAssistant from './Pages/Acessability/Assistant';
 import { setAuthToken } from './utils/auth';
+import Feedback from './Pages/Acessability/Feedback';
 import { MusicProvider } from './context/MusicContext';
 import MusicPlayer from './components/MusicPlayer';
 import { SnackbarProvider } from 'notistack';
@@ -31,6 +34,7 @@ if (localStorage.token) {
 function App() {
   return (
     <SnackbarProvider maxSnack={3}>
+      <ChatAssistant />
       <MusicProvider>
         <BrowserRouter>
           <ThemeProvider theme={theme}>
@@ -40,6 +44,7 @@ function App() {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<HomePage />} />
+                  <Route path="/home" element={<HomePage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -48,6 +53,8 @@ function App() {
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/contact" element={<ContactUs />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/feedback" element={<Feedback />} />
 
                   {/* Protected routes */}
                   <Route path="/player" element={

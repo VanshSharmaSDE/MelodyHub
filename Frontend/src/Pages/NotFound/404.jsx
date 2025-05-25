@@ -27,6 +27,17 @@ function NotFound() {
         justifyContent: 'center',
         py: 8,
         background: 'linear-gradient(135deg, #121212 30%, #151515 100%)',
+              '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
       }}
     >
       <Container maxWidth="md">

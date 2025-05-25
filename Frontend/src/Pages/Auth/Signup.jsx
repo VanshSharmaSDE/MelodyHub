@@ -12,13 +12,16 @@ import {
   InputAdornment,
   IconButton,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Breadcrumbs
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import HomeIcon from '@mui/icons-material/Home';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import LoginIcon from '@mui/icons-material/Login';
 import api from '../../services/api';
 import { storeAuth, setAuthToken } from '../../utils/auth';
 
@@ -121,10 +124,6 @@ function Signup() {
     }
   };
 
-  const handleBack = () => {
-    navigate('/login');
-  }
-
   return (
     <Box
       sx={{
@@ -133,27 +132,77 @@ function Signup() {
         alignItems: 'center',
         py: 8,
         background: 'linear-gradient(135deg, #121212 30%, #151515 100%)',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '300px',
+          background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+          zIndex: 0
+        }
+
       }}
     >
       <Container maxWidth="sm">
-        {/* Back button */}
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs
+          separator="›"
+          aria-label="breadcrumb"
           sx={{
+            mb: 3,
+            mt: 2,
             position: 'absolute',
             top: 20,
             left: 20,
-            color: '#fff',
-            textTransform: 'none',
-            fontSize: '1rem',
-            '&:hover': {
-              backgroundColor: 'rgba(255,255,255,0.1)'
+            '& .MuiBreadcrumbs-ol': {
+              flexWrap: 'wrap'
+            },
+            '& .MuiBreadcrumbs-separator': {
+              color: 'rgba(255,255,255,0.4)'
             }
           }}
         >
-          Back to Login
-        </Button>
+          <Link
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.7)',
+              textDecoration: 'none',
+              '&:hover': { color: '#1DB954' }
+            }}
+          >
+            <HomeIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Home
+          </Link>
+          <Link
+            component={RouterLink}
+            to="/login"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.7)',
+              textDecoration: 'none',
+              '&:hover': { color: '#1DB954' }
+            }}
+          >
+            <LoginIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Login
+          </Link>
+          <Typography
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: '#1DB954'
+            }}
+          >
+            <PersonAddIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Sign Up
+          </Typography>
+        </Breadcrumbs>
 
         <Paper
           elevation={6}
@@ -380,7 +429,7 @@ function Signup() {
                       I agree to the{' '}
                       <Link
                         component={RouterLink}
-                        to="/terms"
+                        to="/terms-of-service"
                         sx={{ color: '#1DB954' }}
                       >
                         Terms of Service
@@ -388,7 +437,7 @@ function Signup() {
                       and{' '}
                       <Link
                         component={RouterLink}
-                        to="/privacy"
+                        to="/privacy-policy"
                         sx={{ color: '#1DB954' }}
                       >
                         Privacy Policy

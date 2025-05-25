@@ -32,7 +32,10 @@ import {
   DialogActions,
   Tooltip,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Link,
+  Breadcrumbs,
+  Slide
 } from '@mui/material';
 import {
   PlayArrow,
@@ -58,10 +61,14 @@ import {
   Shuffle,
   LibraryMusic,
   Close,
-  ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
+  Dashboard as DashboardIcon,
+  AccountCircle as AccountCircleIcon,
+  Logout as LogoutIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import api from '../../services/api';
 import Slider from '@mui/material/Slider';
 import { useSnackbar } from 'notistack';
@@ -77,7 +84,7 @@ const PlayerContainer = styled(Paper)(({ theme }) => ({
   alignItems: 'center',
   backgroundColor: '#181818',
   borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-  zIndex: 10
+  zIndex: 10,
 }));
 
 const PlaylistDrawer = styled(Drawer)(({ theme }) => ({
@@ -91,6 +98,7 @@ const PlaylistDrawer = styled(Drawer)(({ theme }) => ({
 const SongCard = styled(Card)(({ theme }) => ({
   backgroundColor: '#181818',
   transition: 'all 0.3s ease',
+  width: '275px',
   '&:hover': {
     backgroundColor: '#282828',
     transform: 'translateY(-4px)',
@@ -98,11 +106,29 @@ const SongCard = styled(Card)(({ theme }) => ({
   }
 }));
 
+const ProfileCard = styled(Paper)(({ theme }) => ({
+  backgroundColor: 'rgba(30, 30, 30, 0.7)',
+  backdropFilter: 'blur(10px)',
+  padding: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius * 2,
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '4px',
+    width: '100%',
+    background: 'linear-gradient(90deg, #1DB954, #1ed760)'
+  }
+}));
+
 function UserDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const audioRef = useRef(null);
 
   // State
@@ -127,13 +153,14 @@ function UserDashboard() {
   const [playlistDrawerOpen, setPlaylistDrawerOpen] = useState(false);
   const [queue, setQueue] = useState([]);
   const [drawerPlaylist, setDrawerPlaylist] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
 
   // Dialogs
   const [playlistDialog, setPlaylistDialog] = useState(false);
   const [songOptionsAnchor, setSongOptionsAnchor] = useState(null);
   const [selectedSong, setSelectedSong] = useState(null);
   const [selectPlaylistDialog, setSelectPlaylistDialog] = useState(false);
-
 
   // Form state
   const [playlistForm, setPlaylistForm] = useState({
@@ -146,6 +173,7 @@ function UserDashboard() {
   // Load initial data
   useEffect(() => {
     fetchDashboardData();
+    fetchUserProfile();
   }, []);
 
   // Handle audio events
@@ -238,6 +266,17 @@ function UserDashboard() {
       enqueueSnackbar('Error loading your dashboard data', { variant: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get('/user/profile');
+      setUserProfile(response.data.data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      enqueueSnackbar('Failed to load profile information', { variant: 'error' });
     }
   };
 
@@ -378,14 +417,29 @@ function UserDashboard() {
       // Update liked songs
       if (res.data.liked) {
         setLikedSongs([...likedSongs, song]);
-        enqueueSnackbar('Added to your Liked Songs', { variant: 'success' });
+        enqueueSnackbar('Added to your Liked Songs', { 
+          variant: 'success',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+          TransitionComponent: Slide,
+          TransitionProps: { direction: 'left' }
+        });
       } else {
         setLikedSongs(likedSongs.filter(s => s._id !== song._id));
-        enqueueSnackbar('Removed from your Liked Songs', { variant: 'info' });
+        enqueueSnackbar('Removed from your Liked Songs', { 
+          variant: 'info',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+          TransitionComponent: Slide,
+          TransitionProps: { direction: 'left' }
+        });
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      enqueueSnackbar('Failed to update Liked Songs', { variant: 'error' });
+      enqueueSnackbar('Failed to update Liked Songs', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
     }
   };
 
@@ -401,14 +455,29 @@ function UserDashboard() {
       // Update saved songs
       if (res.data.saved) {
         setSavedSongs([...savedSongs, song]);
-        enqueueSnackbar('Added to your Library', { variant: 'success' });
+        enqueueSnackbar('Added to your Library', { 
+          variant: 'success',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+          TransitionComponent: Slide,
+          TransitionProps: { direction: 'left' }
+        });
       } else {
         setSavedSongs(savedSongs.filter(s => s._id !== song._id));
-        enqueueSnackbar('Removed from your Library', { variant: 'info' });
+        enqueueSnackbar('Removed from your Library', { 
+          variant: 'info',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+          TransitionComponent: Slide,
+          TransitionProps: { direction: 'left' }
+        });
       }
     } catch (error) {
       console.error('Error toggling save:', error);
-      enqueueSnackbar('Failed to update Library', { variant: 'error' });
+      enqueueSnackbar('Failed to update Library', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
     }
   };
 
@@ -577,6 +646,12 @@ function UserDashboard() {
     return savedSongs.some(song => song._id === songId);
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   // Render song card
   const renderSongCard = (song) => {
     // Add null check for song
@@ -667,24 +742,186 @@ function UserDashboard() {
     );
   };
 
-  // Handle back button
-  const handleBack = () => {
-    navigate('/');
-  };
-
   return (
     <Box sx={{
       backgroundColor: '#121212',
       minHeight: '100vh',
-      pb: 10 // Add padding for player
+      pb: 10, // Add padding for player
+      marginBottom: '54px', // Adjust for fixed player height
+            '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
     }}>
       {/* Audio element */}
       <audio ref={audioRef} />
 
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ pt: 4 }}>
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs
+          separator="›"
+          aria-label="breadcrumb"
+          sx={{
+            mb: 4,
+            mt: 2,
+            '& .MuiBreadcrumbs-ol': {
+              flexWrap: 'wrap'
+            },
+            '& .MuiBreadcrumbs-separator': {
+              color: 'rgba(255,255,255,0.4)'
+            }
+          }}
+        >
+          <Link
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'rgba(255,255,255,0.7)',
+              textDecoration: 'none',
+              '&:hover': { color: '#1DB954' },
+              zIndex: 1,
+              position: 'relative'
+            }}
+          >
+            <HomeIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Home
+          </Link>
+          <Typography
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: '#1DB954'
+            }}
+          >
+            <DashboardIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Dashboard
+          </Typography>
+        </Breadcrumbs>
+
+        {/* Profile Section */}
+        {userProfile && (
+          <ProfileCard sx={{ mb: 4 }}>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item xs={12} md={8}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    src={userProfile.profileImage}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      mr: 3,
+                      bgcolor: '#1DB954'
+                    }}
+                  >
+                    {userProfile.name ? userProfile.name.charAt(0).toUpperCase() : 'U'}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" gutterBottom fontWeight="bold">
+                      {userProfile.name || 'User'}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {userProfile.email}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <Chip
+                        label={userProfile.role || 'User'}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(29,185,84,0.2)',
+                          color: '#1DB954',
+                          fontWeight: 'bold',
+                          mr: 1
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        ID: {userProfile._id}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Grid>
+              {/* <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}> */}
+                {/* <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<SettingsIcon />}
+                  sx={{ mr: 1 }}
+                  onClick={() => navigate('/profile')}
+                >
+                  Edit Profile
+                </Button> */}
+                <Button
+                  variant="text"
+                  color="error"
+                  startIcon={<LogoutIcon />}
+                  onClick={handleLogout}
+                  sx={{ mb: { xs: 1, md: 8 } }}
+                >
+                  Logout
+                </Button>
+              {/* </Grid> */}
+            </Grid>
+
+            {/* User Statistics */}
+            <Box sx={{ mt: 3 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={6} sm={3}>
+                  <Box sx={{ textAlign: 'center', p: 1, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                    <Typography variant="h6" color="#1DB954">
+                      {likedSongs.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Liked Songs
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Box sx={{ textAlign: 'center', p: 1, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                    <Typography variant="h6" color="#1DB954">
+                      {savedSongs.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Library Songs
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Box sx={{ textAlign: 'center', p: 1, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                    <Typography variant="h6" color="#1DB954">
+                      {playlists.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Playlists
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                  <Box sx={{ textAlign: 'center', p: 1, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.05)' }}>
+                    <Typography variant="h6" color="#1DB954">
+                      {recentlyPlayed.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Recently Played
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </ProfileCard>
+        )}
+
         {/* Search Bar */}
-        <Box sx={{ mb: 4 , mt: 6}}>
+        <Box sx={{ mb: 4 }}>
           <TextField
             fullWidth
             placeholder="Search for songs, artists or albums..."
@@ -764,23 +1001,6 @@ function UserDashboard() {
               // Main Content
               <Box>
                 {/* Tabs */}
-                <Button
-                  startIcon={<ArrowBackIcon />}
-                  onClick={handleBack}
-                  sx={{
-                    position: 'absolute',
-                    top: 20,
-                    left: 20,
-                    color: '#fff',
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255,255,255,0.1)'
-                    }
-                  }}
-                >
-                  Back to Home
-                </Button>
                 <Tabs
                   value={currentTab}
                   onChange={handleTabChange}
@@ -947,6 +1167,13 @@ function UserDashboard() {
             )}
           </>
         )}
+        {/* Footer */}
+        <Box sx={{ textAlign: 'center', mt: 6, color: 'rgba(255,255,255,0.5)', pb: 4 }}>
+          <Typography variant="body2">
+            © 2025 MelodyHub. All rights reserved.
+          </Typography>
+        </Box>
+
       </Container>
 
       {/* Music Player */}

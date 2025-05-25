@@ -39,6 +39,17 @@ function TermsOfService() {
       background: 'linear-gradient(135deg, #121212 0%, #181818 100%)',
       py: { xs: 4, md: 8 },
       color: '#ffffff',
+            '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
     }}>
       <Container maxWidth="lg">
         {/* Breadcrumb Navigation */}
@@ -63,7 +74,9 @@ function TermsOfService() {
               alignItems: 'center',
               color: 'rgba(255,255,255,0.7)',
               textDecoration: 'none',
-              '&:hover': { color: '#1DB954' }
+              '&:hover': { color: '#1DB954' },
+              zIndex: 1,
+              position: 'relative',
             }}
           >
             <HomeIcon fontSize="small" sx={{ mr: 0.5 }} />

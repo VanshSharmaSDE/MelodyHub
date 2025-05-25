@@ -512,7 +512,18 @@ function AdminDashboard() {
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: '#121212',
-      minHeight: '100vh'
+      minHeight: '100vh',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
     }}>
       <AppBar position="static" sx={{ backgroundColor: '#1a1a1a', boxShadow: 1 }}>
         <Toolbar>
@@ -571,7 +582,12 @@ function AdminDashboard() {
               <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<PersonIcon />} label="Users" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<MusicIcon />} label="Songs" iconPosition="start" sx={{ color: '#fff' }} />
-              <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} />
+              <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} disabled />
+              <Tab icon={<PlaylistIcon />} label="Artist" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="Payments" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="Storage" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="UI" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="Feedback" iconPosition="start" sx={{ color: '#fff' }} disabled/>
             </Tabs>
           </Paper>
         </Box>

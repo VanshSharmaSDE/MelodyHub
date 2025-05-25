@@ -105,7 +105,18 @@ function Discover() {
       justifyContent: 'center', 
       py: 5,
       bgcolor: 'rgba(255,255,255,0.05)',
-      borderRadius: 2
+      borderRadius: 2,
+            '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
     }}>
       <Typography variant="h6" color="text.secondary" align="center">
         {message || "No content available"}
@@ -120,6 +131,17 @@ function Discover() {
         background: 'linear-gradient(135deg, #121212 0%, #181818 100%)',
         pt: { xs: 8, md: 10 },
         pb: 8,
+              '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '300px',
+        background: 'linear-gradient(180deg, rgba(29,185,84,0.15) 0%, rgba(29,185,84,0) 100%)',
+        zIndex: 0
+      }
+
       }}
     >
       <Container maxWidth="lg">
@@ -145,7 +167,9 @@ function Discover() {
               alignItems: 'center',
               color: 'rgba(255,255,255,0.7)',
               textDecoration: 'none',
-              '&:hover': { color: '#1DB954' }
+              '&:hover': { color: '#1DB954' },
+              zIndex: 1,
+              position: 'relative',
             }}
           >
             <HomeIcon fontSize="small" sx={{ mr: 0.5 }} />

@@ -143,89 +143,10 @@ function Footer() {
                   >
                     Your ultimate destination for music discovery and enjoyment. Stream millions of songs, create personalized playlists, and connect with artists worldwide.
                   </Typography>
-
-                  {/* Social Media Links */}
-                  <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-                    {[
-                      { icon: <FacebookIcon />, name: 'Facebook' },
-                      { icon: <InstagramIcon />, name: 'Instagram' },
-                      { icon: <TwitterIcon />, name: 'Twitter' },
-                      { icon: <YouTubeIcon />, name: 'YouTube' }
-                    ].map((social, i) => (
-                      <IconButton
-                        key={i}
-                        aria-label={`Follow us on ${social.name}`}
-                        sx={{
-                          color: 'white',
-                          bgcolor: 'rgba(255, 255, 255, 0.07)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            bgcolor: '#1DB954',
-                            transform: 'translateY(-5px)',
-                            boxShadow: '0 5px 15px rgba(29, 185, 84, 0.3)'
-                          }
-                        }}
-                      >
-                        {social.icon}
-                      </IconButton>
-                    ))}
-                  </Box>
                 </Box>
               </Grid>
 
               <Grid item xs={12} md={6}>
-                {/* Download App */}
-                {/* <Box sx={{ mb: 4, mt: { xs: 0, md: 2 } }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: 'white',
-                      fontSize: '1.1rem',
-                      position: 'relative',
-                      display: 'inline-block',
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: -5,
-                        left: 0,
-                        width: 24,
-                        height: 2,
-                        bgcolor: '#1DB954',
-                        borderRadius: 3,
-                      }
-                    }}
-                  >
-                    Download Our App
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                    {[
-                      { icon: <AppleIcon />, text: 'iOS App' },
-                      { icon: <AndroidIcon />, text: 'Android App' }
-                    ].map((app, i) => (
-                      <Button
-                        key={i}
-                        variant="outlined"
-                        startIcon={app.icon}
-                        sx={{
-                          borderColor: 'rgba(255,255,255,0.3)',
-                          color: 'white',
-                          textTransform: 'none',
-                          px: 2,
-                          '&:hover': {
-                            borderColor: '#1DB954',
-                            color: '#1DB954',
-                            backgroundColor: 'rgba(29, 185, 84, 0.08)'
-                          }
-                        }}
-                      >
-                        {app.text}
-                      </Button>
-                    ))}
-                  </Box>
-                </Box> */}
 
                 {/* Customer Support */}
                 <Box sx={{ mb: 3 }}>
@@ -331,9 +252,8 @@ function Footer() {
                       {[
                         { name: 'Home', path: '/' },
                         { name: 'Discover', path: '/discover' },
-                        { name: 'Premium', path: '/premium' },
-                        { name: 'Charts', path: '/charts' },
-                        { name: 'Genres', path: '/genres' }
+                        { name: 'Premium', path: '/pricing' },
+                        { name: 'Feedback', path: '/feedback' },
                       ].map((item) => (
                         <Box
                           component="li"
@@ -400,7 +320,7 @@ function Footer() {
                         } : {}
                       }}
                     >
-                      Company
+                      Social Links
                     </Typography>
 
                     {isMobile && (
@@ -420,11 +340,10 @@ function Footer() {
                       }}
                     >
                       {[
-                        { name: 'About Us', path: '/about' },
-                        { name: 'Careers', path: '/careers' },
-                        { name: 'For Artists', path: '/artists' },
-                        { name: 'Newsroom', path: '/news' },
-                        { name: 'Partners', path: '/partners' }
+                        { name: 'Facebook', path: '/about' },
+                        { name: 'Instagram', path: '/careers' },
+                        { name: 'Twitter', path: '/artists' },
+                        { name: 'Youtube', path: '/news' },
                       ].map((item) => (
                         <Box
                           component="li"

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { Box, Container, CssBaseline, ThemeProvider, Typography, Button, Grid, Card, CardContent, CardMedia } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
+import { Box, Container, CssBaseline, ThemeProvider, Typography, Button, Grid, Card, CardContent, CardMedia, CircularProgress } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -8,68 +8,37 @@ import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import DevicesIcon from '@mui/icons-material/Devices';
 import theme from '../../theme/theme';
-
-
-// Featured playlists data
-const featuredPlaylists = [
-  {
-    id: 1,
-    title: "Today's Top Hits",
-    description: "The hottest tracks right now",
-    image: "https://i.scdn.co/image/ab67706f000000035d87659dcadef82dd0e73f56",
-  },
-  {
-    id: 2,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-  {
-    id: 3,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-  {
-    id: 4,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-  {
-    id: 5,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-  {
-    id: 6,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-    {
-    id: 7,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-
-    {
-    id: 8,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-  {
-    id: 9,
-    title: "Chill Vibes",
-    description: "Relaxing beats for your day",
-    image: "https://i.scdn.co/image/ab67706f00000003bd0e19e810bb4b55ab164a95",
-  },
-];
+import api from '../../services/api';
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [latestSongs, setLatestSongs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch latest songs
+  useEffect(() => {
+    const fetchLatestSongs = async () => {
+      try {
+        setLoading(true);
+        // Use the same endpoint as UserDashboard, but limit to 8 songs
+        const songsRes = await api.get('/general/songs');
+        // Sort by createdAt to get the newest songs first and take first 8
+        const sortedSongs = songsRes.data.data
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 8);
+        setLatestSongs(sortedSongs);
+      } catch (error) {
+        console.error('Error fetching latest songs:', error);
+        setError('Failed to load latest music');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestSongs();
+  }, []);
+
   // Animation for green circles
   useEffect(() => {
     const createCircle = () => {
@@ -95,7 +64,7 @@ const HomePage = () => {
       // Random direction for animation
       circle.style.animationDirection = Math.random() > 0.5 ? 'alternate' : 'alternate-reverse';
 
-      document.getElementById('circles-container').appendChild(circle);
+      document.getElementById('circles-container')?.appendChild(circle);
 
       // Remove circle after animation completes to prevent memory issues
       setTimeout(() => {
@@ -171,7 +140,7 @@ const HomePage = () => {
                   fontWeight: 'bold',
                   fontSize: '1rem',
                 }}
-                onClick={() => window.location.href = '/login'}
+                onClick={() => navigate('/login')}
               >
                 GET STARTED
               </Button>
@@ -206,10 +175,10 @@ const HomePage = () => {
                   <Box sx={{ textAlign: 'center', p: 2 }}>
                     <PlaylistPlayIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
                     <Typography variant="h6" component="h3" gutterBottom>
-                      Curated Playlists
+                      Custom Playlists
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      Expert-curated playlists for any mood, activity, or occasion.
+                      Create your own playlists for any mood, activity, or occasion.
                     </Typography>
                   </Box>
                 </Grid>
@@ -239,7 +208,7 @@ const HomePage = () => {
             </Container>
           </Box>
 
-          {/* Featured Playlists Section */}
+          {/* Latest Music Section (formerly Featured Playlists) */}
           <Box
             sx={{
               py: 8,
@@ -248,72 +217,93 @@ const HomePage = () => {
           >
             <Container maxWidth="lg">
               <Typography variant="h2" component="h2" sx={{ mb: 4 }}>
-                Featured Playlists
+                Latest Music
               </Typography>
-              <Grid container spacing={3}>
-                {featuredPlaylists.map((playlist) => (
-                  <Grid item key={playlist.id} xs={12} sm={6} md={3}>
-                    <Card
-                      sx={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        backgroundColor: 'background.paper',
-                        transition: 'transform 0.3s',
-                        '&:hover': {
-                          transform: 'translateY(-10px)',
-                          '& .MUI-playButton': {
-                            opacity: 1,
-                            transform: 'scale(1)',
-                          }
-                        }
-                      }}
-                    >
-                      <Box sx={{ position: 'relative' }}>
-                        <CardMedia
-                          component="img"
-                          image={playlist.image}
-                          alt={playlist.title}
-                          sx={{ height: 180 }}
-                        />
-                        <Box
-                          className="MUI-playButton"
-                          sx={{
-                            position: 'absolute',
-                            bottom: 8,
-                            right: 8,
-                            bgcolor: 'primary.main',
-                            borderRadius: '50%',
-                            width: 50,
-                            height: 50,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: 0,
-                            transform: 'scale(0.8)',
-                            transition: 'all 0.3s',
-                            boxShadow: '0 8px 16px rgba(30, 215, 96, 0.3)',
-                            '&:hover': {
-                              transform: 'scale(1.1) !important',
-                              bgcolor: 'primary.light',
+              
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                  <CircularProgress color="primary" />
+                </Box>
+              ) : error ? (
+                <Typography variant="body1" color="error" align="center">
+                  {error}
+                </Typography>
+              ) : (
+                <Grid container spacing={3}>
+                  {latestSongs.map((song) => (
+                    <Grid item key={song._id} xs={12} sm={6} md={3}>
+                      <Card
+                        sx={{
+                          height: '100%',
+                          width: '270px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          backgroundColor: 'background.paper',
+                          transition: 'transform 0.3s',
+                          '&:hover': {
+                            transform: 'translateY(-10px)',
+                            '& .MUI-playButton': {
+                              opacity: 1,
+                              transform: 'scale(1)',
                             }
-                          }}
-                        >
-                          <PlayArrowIcon sx={{ fontSize: 30 }} />
+                          }
+                        }}
+                      >
+                        <Box sx={{ position: 'relative', paddingTop: '100%' }}>
+                          <CardMedia
+                            component="img"
+                            image={song.coverImage || '/default-cover.jpg'}
+                            alt={song.title}
+                            sx={{ 
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <Box
+                            className="MUI-playButton"
+                            onClick={() => navigate('/user/dashboard')}
+                            sx={{
+                              position: 'absolute',
+                              bottom: 8,
+                              right: 8,
+                              bgcolor: 'primary.main',
+                              borderRadius: '50%',
+                              width: 50,
+                              height: 50,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              opacity: 0,
+                              transform: 'scale(0.8)',
+                              transition: 'all 0.3s',
+                              cursor: 'pointer',
+                              boxShadow: '0 8px 16px rgba(30, 215, 96, 0.3)',
+                              '&:hover': {
+                                transform: 'scale(1.1) !important',
+                                bgcolor: 'primary.light',
+                              }
+                            }}
+                          >
+                            <PlayArrowIcon sx={{ fontSize: 30 }} />
+                          </Box>
                         </Box>
-                      </Box>
-                      <CardContent sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" component="h3" noWrap>
-                          {playlist.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {playlist.description}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography variant="h6" component="h3" noWrap>
+                            {song.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" noWrap>
+                            {song.artist}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Container>
           </Box>
 
@@ -345,7 +335,7 @@ const HomePage = () => {
                   fontWeight: 'bold',
                   fontSize: '1rem',
                 }}
-                onClick={() => window.location.href = '/signup'}
+                onClick={() => navigate('/signup')}
               >
                 SIGN UP FREE
               </Button>

@@ -803,7 +803,7 @@ const getAllSongs = async (req, res) => {
   try {
     // Add pagination
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
+    const limit = parseInt(req.query.limit, 10) || 2000;
     const startIndex = (page - 1) * limit;
 
     // Add filters
