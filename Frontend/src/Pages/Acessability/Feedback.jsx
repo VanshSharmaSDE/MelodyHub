@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import {
   Box,
   Container,
@@ -30,6 +31,7 @@ import { Link as RouterLink } from 'react-router-dom';
 function FeedbackForm() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const form = useRef();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -38,7 +40,11 @@ function FeedbackForm() {
     liked: '',
     improvements: '',
     recommend: '',
-    additionalFeedback: ''
+    additionalFeedback: '',
+    date: '', // Added date field
+    ratingText: '', // Added for EmailJS template
+    usabilityText: '', // Added for EmailJS template
+    recommendText: '' // Added for EmailJS template
   });
   
   // UI state
@@ -49,6 +55,23 @@ function FeedbackForm() {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [formErrors, setFormErrors] = useState({});
   const [focused, setFocused] = useState({});
+  
+  // Add current date/time when component mounts
+  useEffect(() => {
+    updateCurrentDate();
+  }, []);
+
+  // Update the date field
+  const updateCurrentDate = () => {
+    const now = new Date();
+    // Format date as YYYY-MM-DD HH:MM:SS
+    const formattedDate = now.toISOString().slice(0, 19).replace('T', ' ');
+    
+    setFormData(prev => ({
+      ...prev,
+      date: formattedDate,
+    }));
+  };
   
   const recommendOptions = [
     { value: 'very_likely', label: 'Very Likely' },
@@ -66,12 +89,55 @@ function FeedbackForm() {
     { value: 'very_difficult', label: 'Very Difficult' }
   ];
   
+  // Helper functions to get text values for the template
+  const getRatingText = (rating) => {
+    const texts = ['Poor', 'Below Average', 'Average', 'Good', 'Excellent'];
+    return texts[parseInt(rating) - 1] || '';
+  };
+
+  const getUsabilityText = (usability) => {
+    const map = {
+      very_easy: 'Very Easy',
+      easy: 'Easy',
+      neutral: 'Neutral',
+      difficult: 'Difficult',
+      very_difficult: 'Very Difficult'
+    };
+    return map[usability] || '';
+  };
+
+  const getRecommendText = (recommend) => {
+    const map = {
+      very_likely: 'Very Likely',
+      likely: 'Likely',
+      neutral: 'Neutral',
+      unlikely: 'Unlikely',
+      very_unlikely: 'Very Unlikely'
+    };
+    return map[recommend] || '';
+  };
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Update text values for EmailJS template
+    if (name === 'usability') {
+      setFormData(prev => ({
+        ...prev,
+        usabilityText: getUsabilityText(value)
+      }));
+    }
+    
+    if (name === 'recommend') {
+      setFormData(prev => ({
+        ...prev,
+        recommendText: getRecommendText(value)
+      }));
+    }
     
     // Clear error when field is edited
     if (formErrors[name]) {
@@ -99,7 +165,8 @@ function FeedbackForm() {
   const handleRatingChange = (newValue) => {
     setFormData(prev => ({
       ...prev,
-      rating: newValue
+      rating: newValue,
+      ratingText: getRatingText(newValue) // Update rating text
     }));
     
     if (formErrors.rating) {
@@ -144,12 +211,38 @@ function FeedbackForm() {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      // Create a dynamic form element to submit with EmailJS
+      const dynamicForm = document.createElement('form');
       
-      // Here you would actually send the data to your backend
-      // await api.post('/feedback', formData);
+      // Convert the rating to string for EmailJS template
+      const formWithStringValues = {
+        ...formData,
+        rating: formData.rating.toString(),
+        ratingText: formData.ratingText || getRatingText(formData.rating),
+        usabilityText: formData.usabilityText || getUsabilityText(formData.usability),
+        recommendText: formData.recommendText || getRecommendText(formData.recommend),
+        date: formData.date || new Date().toISOString().slice(0, 19).replace('T', ' '),
+        user: 'VanshSharmaSDEimport' // Adding user's login
+      };
       
+      // Add each field to the form
+      Object.entries(formWithStringValues).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value || '';
+        dynamicForm.appendChild(input);
+      });
+      
+      // Send the email using EmailJS
+      const result = await emailjs.sendForm(
+        'service_wkt3zj9', // Replace with your EmailJS service ID
+        'template_8w6svfq', // Replace with your EmailJS template ID
+        dynamicForm,
+        'eCU48RTYASuiPg0sV' // Replace with your EmailJS public key
+      );
+      
+      console.log('Email sent successfully:', result.text);
       setSubmitted(true);
       setSnackbarMessage('Thank you! Your feedback has been submitted successfully.');
       setSnackbarSeverity('success');
@@ -169,14 +262,19 @@ function FeedbackForm() {
   };
   
   const handleStartNew = () => {
-    setFormData({
+    updateCurrentDate();
+    setFormData(prev => ({
       rating: 0,
       usability: '',
       liked: '',
       improvements: '',
       recommend: '',
-      additionalFeedback: ''
-    });
+      additionalFeedback: '',
+      date: prev.date, // Keep the current date
+      ratingText: '',
+      usabilityText: '',
+      recommendText: ''
+    }));
     setFormErrors({});
     setSubmitted(false);
   };
@@ -413,7 +511,14 @@ function FeedbackForm() {
                 </Box>
               ) : (
                 /* Feedback Form */
-                <Box component="form" onSubmit={handleSubmit}>
+                <Box component="form" ref={form} onSubmit={handleSubmit}>
+                  {/* Hidden fields for EmailJS */}
+                  <input type="hidden" name="date" value={formData.date} />
+                  <input type="hidden" name="ratingText" value={formData.ratingText} />
+                  <input type="hidden" name="usabilityText" value={formData.usabilityText} />
+                  <input type="hidden" name="recommendText" value={formData.recommendText} />
+                  <input type="hidden" name="user" value="VanshSharmaSDEimport" />
+                
                   <Box sx={{ mb: 5 }}>
                     <Typography variant="h5" fontWeight="600" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
                       <FeedbackIcon sx={{ mr: 1.5, color: '#1DB954' }} /> 
@@ -741,14 +846,18 @@ function FeedbackForm() {
                       variant="text"
                       disabled={loading}
                       onClick={() => {
-                        setFormData({
+                        setFormData(prev => ({
                           rating: 0,
                           usability: '',
                           liked: '',
                           improvements: '',
                           recommend: '',
-                          additionalFeedback: ''
-                        });
+                          additionalFeedback: '',
+                          date: prev.date,
+                          ratingText: '',
+                          usabilityText: '',
+                          recommendText: ''
+                        }));
                         setFormErrors({});
                       }}
                       sx={{

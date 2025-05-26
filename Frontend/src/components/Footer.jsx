@@ -50,7 +50,8 @@ function Footer() {
   };
 
   const handleNavigation = (path) => {
-    navigate(path);
+    // navigate(path);
+    window.location.href = path; // Force reload to ensure correct page load
   };
 
   const handleSubscribe = (e) => {
@@ -340,10 +341,8 @@ function Footer() {
                       }}
                     >
                       {[
-                        { name: 'Facebook', path: '/about' },
-                        { name: 'Instagram', path: '/careers' },
-                        { name: 'Twitter', path: '/artists' },
-                        { name: 'Youtube', path: '/news' },
+                        { name: 'Instagram', path: 'https://www.instagram.com/hubmelody1/' },
+                        { name: 'Twitter', path: 'https://x.com/MelodyHub8756' },
                       ].map((item) => (
                         <Box
                           component="li"
@@ -374,149 +373,6 @@ function Footer() {
                 </Box>
               </Grid>
             </Grid>
-          </Grid>
-
-          {/* Newsletter Section - Right Side */}
-          <Grid item xs={12} md={4} width={'100%'} display="flex" justifyContent="center">
-            <Paper
-              elevation={0}
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.03)',
-                p: { xs: 3, md: 4 },
-                borderRadius: 3,
-                border: '1px solid rgba(255,255,255,0.05)',
-                height: '100%',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: 3,
-                  background: 'linear-gradient(90deg, #1DB954, rgba(29, 185, 84, 0.4))',
-                }
-              }}
-            >
-              <EmailIcon
-                sx={{
-                  position: 'absolute',
-                  bottom: -20,
-                  right: -20,
-                  fontSize: 120,
-                  color: 'rgba(29, 185, 84, 0.03)',
-                  transform: 'rotate(-10deg)',
-                  zIndex: 0
-                }}
-              />
-
-              <Box sx={{ position: 'relative', zIndex: 1 }}>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontSize: { xs: '1.4rem', md: '1.5rem' },
-                    fontWeight: 700,
-                    mb: 1,
-                    color: 'white',
-                  }}
-                >
-                  Join Our Newsletter
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: '#B3B3B3',
-                    mb: 3,
-                    fontSize: '0.95rem',
-                    lineHeight: 1.6
-                  }}
-                >
-                  Subscribe for exclusive updates, new releases, and personalized music recommendations delivered directly to your inbox.
-                </Typography>
-
-                <Box
-                  component="form"
-                  onSubmit={handleSubscribe}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                    mb: 3
-                  }}
-                >
-                  <TextField
-                    variant="outlined"
-                    placeholder="Your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                    required
-                    type="email"
-                    InputProps={{
-                      sx: {
-                        bgcolor: 'rgba(255,255,255,0.05)',
-                        borderRadius: '8px',
-                        '& input': {
-                          color: 'white',
-                          p: '12px 14px',
-                          '&::placeholder': {
-                            color: 'rgba(255,255,255,0.5)',
-                            opacity: 1
-                          }
-                        },
-                        '& fieldset': {
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          '&:hover': {
-                            borderColor: 'rgba(255,255,255,0.3)'
-                          }
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#1DB954 !important',
-                        }
-                      }
-                    }}
-                  />
-
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    startIcon={<SendIcon />}
-                    sx={{
-                      bgcolor: '#1DB954',
-                      py: '12px',
-                      minWidth: '100%',
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      transition: 'all 0.3s',
-                      boxShadow: '0 4px 10px rgba(29, 185, 84, 0.3)',
-                      '&:hover': {
-                        bgcolor: '#0DA945',
-                        boxShadow: '0 6px 15px rgba(29, 185, 84, 0.4)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    Subscribe Now
-                  </Button>
-                </Box>
-
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: 'block',
-                    color: 'rgba(255,255,255,0.4)',
-                    fontSize: '0.75rem',
-                    textAlign: 'center'
-                  }}
-                >
-                  By subscribing, you agree to our Privacy Policy and consent to receive updates from us.
-                </Typography>
-              </Box>
-            </Paper>
           </Grid>
         </Grid>
 

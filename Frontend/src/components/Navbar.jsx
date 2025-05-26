@@ -248,6 +248,7 @@ function Navbar() {
                 sx={{
                   borderRadius: 2,
                   mb: 1,
+                  color: 'white',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     bgcolor: 'rgba(29, 185, 84, 0.1)',
@@ -312,14 +313,14 @@ function Navbar() {
                 color="primary"
                 fullWidth
                 component={Link}
-                to="/login"
+                to="/signup"
                 sx={{
                   mt: 3,
                   py: 1.5,
                   fontSize: '1.1rem'
                 }}
               >
-                Try Premium
+                Sign up
               </Button>
             )}
           </List>

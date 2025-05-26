@@ -12,10 +12,10 @@ import {
   Badge,
   Divider,
   CircularProgress,
-    Button,
-    List,
-    ListItem,
-    ListItemText,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import {
   ChatBubble as ChatBubbleIcon,
@@ -46,17 +46,17 @@ function ChatAssistant() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Gemini API key - In production, this should be stored securely
   // const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY; 
-  
+
   // For development purposes only - in production this must be secured
   const GEMINI_API_KEY = 'AIzaSyDg2LlMZcs68I8kP_HERUA7gL6DP5IJ-iI'; // Replace with your actual API key
-  
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
-  
+
   // Initial suggestions
   const initialSuggestions = [
     "How do I create a playlist?",
@@ -69,28 +69,28 @@ function ChatAssistant() {
     // Set initial suggestions
     setSuggestions(initialSuggestions);
   }, []);
-  
+
   // Scroll to bottom of chat when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && open) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, open]);
-  
+
   // Update unread count when chat is closed
   useEffect(() => {
     if (!open && messages.length > 0 && messages[messages.length - 1].type === 'bot' && hasInteracted) {
       setUnreadCount(prevCount => prevCount + 1);
     }
   }, [messages, open, hasInteracted]);
-  
+
   // Clear unread count when chat is opened
   useEffect(() => {
     if (open) {
       setUnreadCount(0);
     }
   }, [open]);
-  
+
   // Focus input when chat is opened
   useEffect(() => {
     if (open && inputRef.current) {
@@ -120,7 +120,7 @@ function ChatAssistant() {
       const conversationContext = chatHistory
         .map(msg => `${msg.type === 'user' ? 'User: ' : 'Assistant: '}${msg.content}`)
         .join('\n');
-      
+
       // System prompt to guide Gemini's responses
       const systemPrompt = `
         You are MelodyBot, an AI assistant for the music streaming application called MelodyHub.
@@ -145,7 +145,7 @@ function ChatAssistant() {
         User: ${userQuery}
         Assistant:
       `;
-      
+
       // Prepare the API request
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY, {
         method: 'POST',
@@ -170,16 +170,16 @@ function ChatAssistant() {
           },
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Extract the generated text from the response
       const generatedText = data.candidates[0].content.parts[0].text;
-      
+
       return generatedText.trim();
     } catch (error) {
       console.error("Error calling Gemini API:", error);
@@ -201,7 +201,7 @@ function ChatAssistant() {
         Return ONLY the questions with no additional text, one per line.
         Each question should be less than 60 characters.
       `;
-      
+
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + GEMINI_API_KEY, {
         method: 'POST',
         headers: {
@@ -223,21 +223,21 @@ function ChatAssistant() {
           },
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
+
       const data = await response.json();
       const suggestionsText = data.candidates[0].content.parts[0].text;
-      
+
       // Split the response into individual suggestions
       const generatedSuggestions = suggestionsText
         .split('\n')
         .filter(line => line.trim().length > 0)
         .map(line => line.replace(/^\d+\.\s*/, '').trim()) // Remove numbering if present
         .slice(0, 3); // Take up to 3 suggestions
-      
+
       setSuggestions(generatedSuggestions);
       setShowSuggestions(true);
     } catch (error) {
@@ -251,7 +251,7 @@ function ChatAssistant() {
   // Handle message submission
   const handleSubmit = async () => {
     if (!query.trim()) return;
-    
+
     // Add user message
     const userMessage = {
       id: Date.now(),
@@ -261,33 +261,33 @@ function ChatAssistant() {
     };
     setMessages(prev => [...prev, userMessage]);
     setHasInteracted(true);
-    
+
     // Clear input and show loading
     setQuery('');
     setLoading(true);
     setSuggestions([]);
     setError(null);
-    
+
     try {
       // Get response from Gemini API
       const recentMessages = messages.slice(-6); // Use last 6 messages for context
       const answer = await getGeminiResponse(userMessage.content, recentMessages);
-      
+
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
         content: answer,
         time: new Date()
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
-      
+
       // Generate new suggestions based on the conversation
       await generateSuggestions(userMessage.content);
     } catch (err) {
       console.error("Error in chat flow:", err);
       setError("Sorry, something went wrong. Please try again.");
-      
+
       // Add error message
       const errorMessage = {
         id: Date.now() + 1,
@@ -296,7 +296,7 @@ function ChatAssistant() {
         time: new Date(),
         isError: true
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -322,32 +322,32 @@ function ChatAssistant() {
     };
     setMessages(prev => [...prev, userMessage]);
     setHasInteracted(true);
-    
+
     // Show loading
     setLoading(true);
     setSuggestions([]);
     setError(null);
-    
+
     try {
       // Get response from Gemini API
       const recentMessages = messages.slice(-6); // Use last 6 messages for context
       const answer = await getGeminiResponse(suggestion, recentMessages);
-      
+
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
         content: answer,
         time: new Date()
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
-      
+
       // Generate new suggestions
       await generateSuggestions(suggestion);
     } catch (err) {
       console.error("Error in suggestion flow:", err);
       setError("Sorry, something went wrong. Please try again.");
-      
+
       // Add error message
       const errorMessage = {
         id: Date.now() + 1,
@@ -356,7 +356,7 @@ function ChatAssistant() {
         time: new Date(),
         isError: true
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -492,7 +492,7 @@ function ChatAssistant() {
                 )}
                 <Box
                   sx={{
-                    backgroundColor: message.type === 'bot' 
+                    backgroundColor: message.type === 'bot'
                       ? message.isError ? 'rgba(244, 67, 54, 0.1)' : 'rgba(29, 185, 84, 0.1)'
                       : 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 2,
@@ -503,9 +503,9 @@ function ChatAssistant() {
                     borderTopRightRadius: message.type === 'user' ? 0 : 2,
                   }}
                 >
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
+                  <Typography
+                    variant="body2"
+                    sx={{
                       color: 'white',
                       whiteSpace: 'pre-wrap',
                       overflowWrap: 'break-word'
@@ -513,9 +513,9 @@ function ChatAssistant() {
                   >
                     {message.content}
                   </Typography>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
+                  <Typography
+                    variant="caption"
+                    sx={{
                       color: 'rgba(255, 255, 255, 0.5)',
                       display: 'block',
                       textAlign: message.type === 'user' ? 'right' : 'left',
@@ -541,7 +541,7 @@ function ChatAssistant() {
                 )}
               </Box>
             ))}
-            
+
             {/* Loading indicator */}
             {loading && (
               <Box sx={{ display: 'flex', alignItems: 'center', ml: 5 }}>
@@ -570,7 +570,7 @@ function ChatAssistant() {
                 </Box>
               </Box>
             )}
-            
+
             {/* Error message */}
             {error && !loading && (
               <Box sx={{ px: 2, py: 1, backgroundColor: 'rgba(244, 67, 54, 0.1)', borderRadius: 1, mx: 1 }}>
@@ -580,15 +580,15 @@ function ChatAssistant() {
                 </Typography>
               </Box>
             )}
-            
+
             {/* Anchor for scrolling to bottom */}
             <div ref={messagesEndRef} />
           </Box>
-          
+
           {/* Suggestions */}
           {suggestions.length > 0 && showSuggestions && (
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 px: 2,
                 py: 1.5,
                 borderTop: '1px solid rgba(255, 255, 255, 0.05)',
@@ -603,8 +603,8 @@ function ChatAssistant() {
                   <QuestionAnswerIcon sx={{ fontSize: 12, mr: 0.5, mb: -0.2 }} />
                   Suggested questions
                 </Typography>
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={() => setShowSuggestions(false)}
                   sx={{ color: 'rgba(255, 255, 255, 0.4)', p: 0.5 }}
                 >
@@ -665,12 +665,12 @@ function ChatAssistant() {
                 },
               }}
             >
-              <SearchIcon 
-                sx={{ 
-                  color: 'rgba(255, 255, 255, 0.5)', 
+              <SearchIcon
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.5)',
                   mr: 1,
-                  fontSize: 20 
-                }} 
+                  fontSize: 20
+                }}
               />
               <InputBase
                 placeholder="Ask me about MelodyHub..."
@@ -710,16 +710,16 @@ function ChatAssistant() {
               <SendIcon fontSize="small" />
             </IconButton>
           </Box>
-          
+
           {/* Used by attribution */}
-          <Box 
-            sx={{ 
-              py: 1, 
+          <Box
+            sx={{
+              py: 1,
               px: 2,
               backgroundColor: '#161616',
               borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-              display: 'flex', 
-              justifyContent: 'center', 
+              display: 'flex',
+              justifyContent: 'center',
               alignItems: 'center'
             }}
           >
@@ -730,59 +730,6 @@ function ChatAssistant() {
           </Box>
         </Paper>
       </Fade>
-
-      {/* Introduce chat bubble when first loaded */}
-      <Zoom in={!open && !hasInteracted} timeout={1000}>
-        <Paper
-          elevation={4}
-          sx={{
-            position: 'fixed',
-            bottom: 96,
-            right: 24,
-            maxWidth: 220,
-            p: 2,
-            borderRadius: 2,
-            backgroundColor: '#1e1e1e',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            zIndex: 999,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            '&:after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -10,
-              right: 24,
-              width: 0,
-              height: 0,
-              borderLeft: '10px solid transparent',
-              borderRight: '10px solid transparent',
-              borderTop: '10px solid #1e1e1e'
-            }
-          }}
-        >
-          <Typography variant="body2" sx={{ color: 'white' }}>
-            Need help with MelodyHub?
-          </Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<QuestionAnswerIcon />}
-            onClick={toggleChat}
-            sx={{
-              borderColor: '#1DB954',
-              color: '#1DB954',
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: '#1DB954',
-                backgroundColor: 'rgba(29, 185, 84, 0.1)',
-              },
-            }}
-          >
-            Ask MelodyBot
-          </Button>
-        </Paper>
-      </Zoom>
     </>
   );
 }

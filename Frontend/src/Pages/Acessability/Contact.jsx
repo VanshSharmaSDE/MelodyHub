@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import {
   Box,
   Container,
@@ -27,6 +28,7 @@ import { Link as RouterLink } from 'react-router-dom';
 function ContactPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const form = useRef();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -104,6 +106,15 @@ function ContactPage() {
     return Object.keys(errors).length === 0;
   };
 
+  const issueTypes = [
+    { value: "account", label: "Account & Login", color: "#FF5722" },
+    { value: "billing", label: "Billing & Subscription", color: "#FFC107" },
+    { value: "playback", label: "Playback & Streaming", color: "#2196F3" },
+    { value: "feature", label: "Feature Request", color: "#4CAF50" },
+    { value: "bug", label: "Report a Bug", color: "#F44336" },
+    { value: "other", label: "Other", color: "#9C27B0" }
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -117,12 +128,45 @@ function ContactPage() {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Add current date and time
+      const now = new Date();
+      const formattedDate = now.toISOString().slice(0, 19).replace('T', ' ');
 
-      // Here you would actually send the data to your backend
-      // const response = await api.post('/contact', formData);
+      // Create a hidden field for date
+      const dateInput = document.createElement('input');
+      dateInput.type = 'hidden';
+      dateInput.name = 'date';
+      dateInput.value = formattedDate;
+      form.current.appendChild(dateInput);
 
+      // Add issue type label
+      const issueTypeLabel = issueTypes.find(type => type.value === formData.issueType)?.label || 'Other';
+
+      const issueTypeLabelInput = document.createElement('input');
+      issueTypeLabelInput.type = 'hidden';
+      issueTypeLabelInput.name = 'issueTypeLabel';
+      issueTypeLabelInput.value = issueTypeLabel;
+      form.current.appendChild(issueTypeLabelInput);
+
+      console.log('Sending email with data:', {
+        ...formData,
+        dateInput: formattedDate,
+        issueTypeLabel: issueTypeLabel
+      });
+
+      // EmailJS send form
+      const result = await emailjs.sendForm(
+        'service_wkt3zj9',
+        'template_hy2ew38',
+        form.current,
+        'eCU48RTYASuiPg0sV'
+      );
+
+      // Remove the temporary fields
+      if (dateInput) form.current.removeChild(dateInput);
+      if (issueTypeLabelInput) form.current.removeChild(issueTypeLabelInput);
+
+      console.log('Email sent successfully:', result.text);
       setSnackbarMessage('Your message has been sent! We\'ll get back to you soon.');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
@@ -136,7 +180,7 @@ function ContactPage() {
         issueType: '',
       });
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending email:', error);
       setSnackbarMessage('Failed to send message. Please try again later.');
       setSnackbarSeverity('error');
       setOpenSnackbar(true);
@@ -168,15 +212,6 @@ function ContactPage() {
       details: "123 Music Avenue, Suite 456",
       subtitle: "San Francisco, CA 94107"
     }
-  ];
-
-  const issueTypes = [
-    { value: "account", label: "Account & Login", color: "#FF5722" },
-    { value: "billing", label: "Billing & Subscription", color: "#FFC107" },
-    { value: "playback", label: "Playback & Streaming", color: "#2196F3" },
-    { value: "feature", label: "Feature Request", color: "#4CAF50" },
-    { value: "bug", label: "Report a Bug", color: "#F44336" },
-    { value: "other", label: "Other", color: "#9C27B0" }
   ];
 
   return (
@@ -349,47 +384,6 @@ function ContactPage() {
                 ))}
               </Box>
 
-              <Box
-                sx={{
-                  mt: 6,
-                  py: 3,
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
-                }}
-              >
-                <Typography variant="h6" fontWeight="600" mb={1}>
-                  Follow Us
-                </Typography>
-                <Typography variant="body2" color="rgba(255,255,255,0.7)" mb={2}>
-                  Stay updated with the latest news and releases
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  {[
-                    { name: 'Twitter', color: '#1DA1F2' },
-                    { name: 'Facebook', color: '#4267B2' },
-                    { name: 'Instagram', color: '#C13584' },
-                    { name: 'YouTube', color: '#FF0000' }
-                  ].map((platform) => (
-                    <Button
-                      key={platform.name}
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        borderColor: 'rgba(255,255,255,0.2)',
-                        color: 'rgba(255,255,255,0.8)',
-                        '&:hover': {
-                          borderColor: platform.color,
-                          color: platform.color,
-                          backgroundColor: `${platform.color}10`
-                        }
-                      }}
-                    >
-                      {platform.name}
-                    </Button>
-                  ))}
-                </Box>
-              </Box>
-
               <Typography variant="body2" mt={4} color="rgba(255,255,255,0.5)">
                 Our support team is available Monday through Friday from 9am to 5pm EST.
                 For urgent inquiries during weekends, please use the emergency contact form.
@@ -467,7 +461,7 @@ function ContactPage() {
                 </Typography>
               </Box>
 
-              <form onSubmit={handleSubmit}>
+              <form ref={form} onSubmit={handleSubmit}>
                 <Box sx={{ mb: 4 }}>
                   <Box sx={{ mb: 0.75, display: 'flex', justifyContent: 'space-between' }}>
                     <label
@@ -654,7 +648,7 @@ function ContactPage() {
                     >
                       <option value="" disabled>Select an issue type</option>
                       {issueTypes.map(type => (
-                        <option key={type.value} value={type.value} style={{backgroundColor: 'black !important',}}>
+                        <option key={type.value} value={type.value} style={{ backgroundColor: 'black !important', }}>
                           {type.label}
                         </option>
                       ))}
