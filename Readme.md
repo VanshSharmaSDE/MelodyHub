@@ -23,7 +23,6 @@
 - [Development Team](#-development-team)
 - [Contributing](#-contributing)
 - [Contact & Support](#-contact--support)
-- [License](#-license)
 
 ## 🌟 Overview
 
@@ -234,9 +233,9 @@ We're committed to continuously enhancing MelodyHub. Here's what's on our develo
 
 MelodyHub is proudly developed and maintained by a passionate team led by:
 
-- **[Princy, Kalpana, Aishwarya [TL , Content Mannager]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
-- **[ Kalpana, Aishwarya [Frontend Developer]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
-- **[Princy, [Backend Developer]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
+- **[ Aishwarya ](https://github.com/Anuj-prajapati-SDE)** - Team Leader & Content Manager
+- **[ Kalpana ](https://github.com/Anuj-prajapati-SDE)** - Frontend Develper
+- **[ Princy ](https://github.com/Anuj-prajapati-SDE)** - Backend Developer & Deployment
 
 Our team combines expertise in music, user experience design, and cutting-edge web technologies to create the best possible platform for music lovers.
 
