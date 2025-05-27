@@ -16,7 +16,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import {
-  Email as EmailIcon,
+  Email as EmailIcon, 
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   Send as SendIcon,
