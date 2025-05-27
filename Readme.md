@@ -7,7 +7,7 @@
   
   [![Live Demo]](https://melodyhub-v1-0-0.onrender.com/)
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Anuj-prajapati-SDE/melodyhub)
-  [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
 </div>
 
 ## 📋 Table of Contents
@@ -137,23 +137,20 @@ MelodyHub is built with a modern, scalable technology stack:
 - **Redux** - State management for consistent user experience
 - **Web Audio API** - Advanced audio processing and visualization
 - **Framer Motion** - Powerful animation library for fluid UI transitions
-- **React Spring** - Physics-based animations for natural interaction feedback
 
 ### Backend
 - **Node.js** - High-performance, event-driven server environment
 - **Express** - Fast, minimalist web framework for flexible API development
 - **JWT & OAuth** - Secure authentication and authorization
-- **Socket.io** - Real-time collaborative features and notifications
 
 ### Database
 - **MongoDB** - NoSQL database for flexible data storage and retrieval
 - **Mongoose** - Elegant MongoDB object modeling
-- **Redis** - In-memory data structure store for caching and performance
+
 
 ### DevOps
 - **GitHub** - Version control and collaboration
 - **Render** - Cloud hosting platform
-- **CI/CD Pipeline** - Automated testing and deployment workflow
 
 ## 🚀 Getting Started
 
@@ -247,19 +244,12 @@ We welcome contributions from the community! To contribute:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
-
 ## 📬 Contact & Support
 
 - **Website**: [melodyhub-v1-0-0.onrender.com]
 - **Email**: hubmelody1@gmail.com
 - **GitHub Issues**: [Report bugs or request features](https://melodyhub-v1-0-0.onrender.com/feedback)
 
-## 📄 License
-
-MelodyHub is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
-
----
 
 <div align="center">
     <a href="https://melodyhub-v1-0-0.onrender.com/terms-of-service">Terms of Service</a> • 
