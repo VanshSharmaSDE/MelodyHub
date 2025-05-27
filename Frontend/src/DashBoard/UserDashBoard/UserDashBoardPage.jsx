@@ -832,21 +832,6 @@ function UserDashboard() {
                     <Typography variant="body1" color="text.secondary">
                       {userProfile.email}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                      <Chip
-                        label={userProfile.role || 'User'}
-                        size="small"
-                        sx={{
-                          bgcolor: 'rgba(29,185,84,0.2)',
-                          color: '#1DB954',
-                          fontWeight: 'bold',
-                          mr: 1
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        ID: {userProfile._id}
-                      </Typography>
-                    </Box>
                   </Box>
                 </Box>
               </Grid>
@@ -865,7 +850,7 @@ function UserDashboard() {
                   color="error"
                   startIcon={<LogoutIcon />}
                   onClick={handleLogout}
-                  sx={{ mb: { xs: 1, md: 8 } }}
+                  sx={{ mb: { xs: 1, md: 4 } }}
                 >
                   Logout
                 </Button>

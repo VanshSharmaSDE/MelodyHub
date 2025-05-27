@@ -18,7 +18,7 @@ import Unauthorized from './Pages/NotFound/Unauthorize';
 import PrivacyPolicy from './Pages/Privacy&Terms/PrivacyPolicy';
 import TermsOfService from './Pages/Privacy&Terms/TermsOfService';
 import ContactUs from './Pages/Acessability/Contact';
-import Pricing from './Pages/Acessability/Pricing'; 
+import Pricing from './Pages/Acessability/Pricing';
 import ChatAssistant from './Pages/Acessability/Assistant';
 import { setAuthToken } from './utils/auth';
 import Feedback from './Pages/Acessability/Feedback';
@@ -84,7 +84,7 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Box>
-              
+
               {/* Global Music Player that appears across all authenticated pages */}
               <MusicPlayer />
             </Box>

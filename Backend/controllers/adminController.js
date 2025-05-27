@@ -292,13 +292,14 @@ const updateSong = async (req, res) => {
     }
 
     // Update basic song details
-    const { title, artist, album, genre, releaseYear, isPublic } = req.body;
+    const { title, artist, album, genre, releaseYear, isPublic, duration } = req.body;
 
     const updatedSongData = {
       title: title || song.title,
       artist: artist || song.artist,
       album: album || song.album,
       genre: genre || song.genre,
+      duration: duration ? parseInt(duration) : song.duration,
       releaseYear: releaseYear ? parseInt(releaseYear) : song.releaseYear,
       isPublic: isPublic !== undefined ? isPublic : song.isPublic
     };

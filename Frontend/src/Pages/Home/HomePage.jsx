@@ -15,7 +15,27 @@ const HomePage = () => {
   const [latestSongs, setLatestSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      // Try to get user role
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUserRole(parsedUser.role);
+        }
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+      }
+    }
+  }, []);
+  
   // Fetch latest songs
   useEffect(() => {
     const fetchLatestSongs = async () => {
@@ -83,6 +103,21 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle button click based on login status
+  const handleGetStartedClick = () => {
+    if (isLoggedIn) {
+      // If user is logged in, redirect to appropriate dashboard based on role
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+    } else {
+      // If not logged in, redirect to login page
+      navigate('/login');
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -140,9 +175,9 @@ const HomePage = () => {
                   fontWeight: 'bold',
                   fontSize: '1rem',
                 }}
-                onClick={() => navigate('/login')}
+                onClick={handleGetStartedClick}
               >
-                GET STARTED
+                {isLoggedIn ? 'GO TO DASHBOARD' : 'GET STARTED'}
               </Button>
             </Container>
           </Box>
@@ -322,7 +357,7 @@ const HomePage = () => {
                 Ready to start listening?
               </Typography>
               <Typography variant="h5" sx={{ mb: 4, opacity: 0.8 }}>
-                Join MelodyHub today and get three months free.
+                Join MelodyHub today 🎵
               </Typography>
               <Button
                 variant="contained"

@@ -582,12 +582,12 @@ function AdminDashboard() {
               <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<PersonIcon />} label="Users" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<MusicIcon />} label="Songs" iconPosition="start" sx={{ color: '#fff' }} />
-              <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} disabled />
+              {/* <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} disabled />
               <Tab icon={<PlaylistIcon />} label="Artist" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="Payments" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="Storage" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="UI" iconPosition="start" sx={{ color: '#fff' }} disabled/>
-              <Tab icon={<PlaylistIcon />} label="Feedback" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="Feedback" iconPosition="start" sx={{ color: '#fff' }} disabled/> */}
             </Tabs>
           </Paper>
         </Box>

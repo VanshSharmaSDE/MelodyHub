@@ -51,7 +51,7 @@ function ChatAssistant() {
   // const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY; 
 
   // For development purposes only - in production this must be secured
-  const GEMINI_API_KEY = 'AIzaSyDg2LlMZcs68I8kP_HERUA7gL6DP5IJ-iI'; // Replace with your actual API key
+  const GEMINI_API_KEY = 'AIzaSyA_ny8QLHvOFqWjy1RRfWhq_xf7JRcoiO0'; // Replace with your actual API key
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
