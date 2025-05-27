@@ -1,11 +1,11 @@
 # 🎵 MelodyHub
 
 <div align="center">
-  <img src="https://i.imgur.com/YourLogoHere.png" alt="MelodyHub Logo" width="200"/>
+  <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748326523/1747249849835_1747249849548_1747249848706_1747249847850_1747249846083_1747249845185_1747249840266_1747249836747_1747249835944_1747249835166_1747249834289_1747249833109_1747249831064_Untitled6_20250515003921_t9ovm0.png" alt="MelodyHub Logo" width="200"/>
   <h3>Your Ultimate Music Streaming Experience</h3>
   <p>Discover, Stream, and Share Music Like Never Before</p>
   
-  [![Live Demo](https://img.shields.io/badge/LIVE-DEMO-brightgreen?style=for-the-badge)](https://melodyhub-v1-0-0.onrender.com/)
+  [![Live Demo]](https://melodyhub-v1-0-0.onrender.com/)
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Anuj-prajapati-SDE/melodyhub)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 </div>
