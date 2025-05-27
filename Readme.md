@@ -251,7 +251,7 @@ We welcome contributions from the community! To contribute:
 
 ## 📬 Contact & Support
 
-- **Website**: [melodyhub-v1-0-0.onrender.com]
+- **Website**: [melodyhub-v1-0-0.onrender.com](https://melodyhub-v1-0-0.onrender.com)
 - **Email**: hubmelody1@gmail.com
 - **GitHub Issues**: [Report bugs or request features](https://melodyhub-v1-0-0.onrender.com/feedback)
 
