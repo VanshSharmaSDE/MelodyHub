@@ -31,7 +31,7 @@ MelodyHub redefines the music streaming experience with a beautifully designed, 
 
 <div align="center">
   <a href="https://melodyhub-v1-0-0.onrender.com/" target="_blank">
-    <img src="https://i.imgur.com/YourScreenshotHere.png" alt="MelodyHub Interface" width="75%"/>
+    <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327140/IMG_20250527_114320_q4vuqo.jpg" alt="MelodyHub Interface" width="75%"/>
     <p><i>Experience MelodyHub today - Click to visit our live platform</i></p>
   </a>
 </div>
@@ -44,7 +44,7 @@ MelodyHub redefines the music streaming experience with a beautifully designed, 
 - **Cross-Device Functionality** - Start listening on one device and continue on another without missing a beat
 
 ### 🔍 Smart Discovery
-- **AI-Powered Recommendations** - Get personalized music suggestions based on your listening patterns
+
 - **Mood & Activity Playlists** - Find perfect playlists for any moment, whether you're working out, relaxing, or partying
 - **Genre Exploration** - Dive deep into any music genre with curated collections and artist spotlights
 - **New Releases & Trending** - Stay updated with the latest music and current trends
@@ -108,20 +108,24 @@ MelodyHub creates magical moments through thoughtful interaction design:
 <div align="center">
   <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
     <div style="flex-basis: 48%;">
-      <img src="https://i.imgur.com/HomeScreenHere.png" alt="Home Dashboard" width="100%"/>
-      <p><i>Personalized Home Dashboard</i></p>
+      <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327134/IMG_20250527_114211_ikx07u.jpg" alt="states" width="100%"/>
+      <p><i>Stats Page</i></p>
     </div>
     <div style="flex-basis: 48%;">
-      <img src="https://i.imgur.com/PlayerHere.png" alt="Music Player Interface" width="100%"/>
-      <p><i>Immersive Player Experience</i></p>
+      <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327139/IMG_20250527_114413_flxlo2.jpg" alt="Discover Page" width="100%"/>
+      <p><i>Discover Page</i><a href="https://melodyhub-v1-0-0.onrender.com/discover">View Know</a></p>
     </div>
     <div style="flex-basis: 48%;">
-      <img src="https://i.imgur.com/LibraryHere.png" alt="Library View" width="100%"/>
-      <p><i>Organized Music Library</i></p>
+      <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327135/IMG_20250527_114123_m7wiex.jpg" alt="Premium Page" width="100%"/>
+      <p><i>Premium Page</i><a href="https://melodyhub-v1-0-0.onrender.com/pricing">View Know</a></p>
     </div>
     <div style="flex-basis: 48%;">
-      <img src="https://i.imgur.com/ProfileHere.png" alt="User Profile" width="100%"/>
-      <p><i>Customizable User Profiles</i></p>
+      <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327135/IMG_20250527_114222_gbvtyt.jpg" alt="Contact Us Page" width="100%"/>
+      <p><i>Contact Us Page</i><a href="https://melodyhub-v1-0-0.onrender.com/contact">View Know</a></p>
+    </div>
+    <div style="flex-basis: 48%;">
+      <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748327134/IMG_20250527_115107_nzs1rb.jpg" alt="Contact Us Page" width="100%"/>
+      <p><i>Melody Bot </i></p>
     </div>
   </div>
 </div>
@@ -230,7 +234,9 @@ We're committed to continuously enhancing MelodyHub. Here's what's on our develo
 
 MelodyHub is proudly developed and maintained by a passionate team led by:
 
-- **[Anuj Prajapati](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
+- **[Princy, Kalpana, Aishwarya [TL , Content Mannager]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
+- **[ Kalpana, Aishwarya [Frontend Developer]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
+- **[Princy, [Backend Developer]](https://github.com/Anuj-prajapati-SDE)** - Founder & Lead Developer
 
 Our team combines expertise in music, user experience design, and cutting-edge web technologies to create the best possible platform for music lovers.
 
