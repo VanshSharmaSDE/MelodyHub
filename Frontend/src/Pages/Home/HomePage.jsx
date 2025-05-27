@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Container, CssBaseline, ThemeProvider, Typography, Button, Grid, Card, CardContent, CardMedia, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Container, CssBaseline, ThemeProvider, Typography, Button, Grid, Card, CardContent, CardMedia, CircularProgress, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -7,8 +7,44 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import DevicesIcon from '@mui/icons-material/Devices';
+import PersonIcon from '@mui/icons-material/Person';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import theme from '../../theme/theme';
 import api from '../../services/api';
+
+// CountUp component for animating numbers
+const CountUp = ({ end, duration = 2000, prefix = '', suffix = '' }) => {
+  const [count, setCount] = useState(0);
+  const stepRef = useRef(null);
+  const startTimeRef = useRef(null);
+
+  useEffect(() => {
+    // Reset count when end changes
+    setCount(0);
+    
+    const animate = (timestamp) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const progress = timestamp - startTimeRef.current;
+      const percentage = Math.min(progress / duration, 1);
+      
+      setCount(Math.floor(percentage * end));
+      
+      if (percentage < 1) {
+        stepRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    stepRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (stepRef.current) {
+        cancelAnimationFrame(stepRef.current);
+      }
+    };
+  }, [end, duration]);
+
+  return <>{prefix}{count.toLocaleString()}{suffix}</>;
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -17,6 +53,13 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  // Update the stats state structure to match API response
+  const [stats, setStats] = useState({
+    stats: { users: 0, songs: 0 },
+    popularGenres: [],
+    recentUsers: []
+  });
+  const [statsLoaded, setStatsLoaded] = useState(false);
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -57,6 +100,35 @@ const HomePage = () => {
     };
 
     fetchLatestSongs();
+  }, []);
+
+  // Fetch stats - updated to match API response structure
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/general/stats/quick');
+        if (response.data.success && response.data.data) {
+          setStats(response.data.data);
+        } else {
+          setStats({
+            stats: { users: 0, songs: 0 },
+            popularGenres: [],
+            recentUsers: []
+          });
+        }
+        setStatsLoaded(true);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        setStats({
+          stats: { users: 0, songs: 0 },
+          popularGenres: [],
+          recentUsers: []
+        });
+        setStatsLoaded(true);
+      }
+    };
+    
+    fetchStats();
   }, []);
 
   // Animation for green circles
@@ -182,6 +254,199 @@ const HomePage = () => {
             </Container>
           </Box>
 
+          {/* Stats Section - Updated */}
+          <Box
+            sx={{
+              py: 6,
+              px: { xs: 2, sm: 4, md: 8 },
+              backgroundColor: 'rgba(29, 185, 84, 0.05)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <Container maxWidth="lg">
+              <Typography variant="h2" component="h2" align="center" gutterBottom>
+                Join Our Growing Community
+              </Typography>
+              <Typography variant="body1" align="center" sx={{ mb: 5, opacity: 0.8, maxWidth: '800px', mx: 'auto' }}>
+                MelodyHub is rapidly growing with users and songs from around the world. 
+                Be part of our music-loving community today!
+              </Typography>
+              
+              <Grid container spacing={4} justifyContent="center">
+                <Grid item xs={12} sm={6} md={4}>
+                  <Box
+                    sx={{ 
+                      textAlign: 'center',
+                      p: 4,
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%'
+                    }}
+                  >
+                    <Box sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2
+                    }}>
+                      <PersonIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                    </Box>
+                    <Typography variant="h2" component="div" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      {statsLoaded ? (
+                        <CountUp end={stats.stats.users} duration={2000} suffix="+" />
+                      ) : (
+                        <CircularProgress size={30} color="primary" />
+                      )}
+                    </Typography>
+                    <Typography variant="h6" component="div" sx={{ opacity: 0.7 }}>
+                      Active Users
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={4}>
+                  <Box
+                    sx={{ 
+                      textAlign: 'center',
+                      p: 4,
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%'
+                    }}
+                  >
+                    <Box sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2
+                    }}>
+                      <MusicNoteIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                    </Box>
+                    <Typography variant="h2" component="div" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      {statsLoaded ? (
+                        <CountUp end={stats.stats.songs} duration={2000} suffix="+" />
+                      ) : (
+                        <CircularProgress size={30} color="primary" />
+                      )}
+                    </Typography>
+                    <Typography variant="h6" component="div" sx={{ opacity: 0.7 }}>
+                      Songs Available
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+              
+              {/* Popular Genres Section - New */}
+              {statsLoaded && stats.popularGenres && stats.popularGenres.length > 0 && (
+                <Box sx={{ mt: 6 }}>
+                  <Typography variant="h4" align="center" gutterBottom>
+                    Popular Genres
+                  </Typography>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    justifyContent: 'center', 
+                    gap: 2, 
+                    mt: 3 
+                  }}>
+                    {stats.popularGenres.map((genre, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          bgcolor: 'rgba(29, 185, 84, 0.1)',
+                          color: 'white',
+                          borderRadius: 4,
+                          px: 3,
+                          py: 1.5,
+                          textAlign: 'center',
+                          border: '1px solid rgba(29, 185, 84, 0.3)',
+                          minWidth: '120px'
+                        }}
+                      >
+                        <Typography variant="h6" sx={{ mb: 0.5, textTransform: 'capitalize' }}>
+                          {genre._id}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                          {genre.count} Songs
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {/* Recent Users Section - New */}
+              {statsLoaded && stats.recentUsers && stats.recentUsers.length > 0 && (
+                <Box sx={{ mt: 6 }}>
+                  <Typography variant="h4" align="center" gutterBottom>
+                    Newest Members
+                  </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    gap: 2,
+                    mt: 3
+                  }}>
+                    {stats.recentUsers.map((user, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          bgcolor: 'rgba(0, 0, 0, 0.2)',
+                          borderRadius: 4,
+                          p: 1.5,
+                          minWidth: { xs: '45%', md: '200px' }
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: `hsl(${index * 60}, 70%, 50%)`,
+                            mr: 1.5
+                          }}
+                        >
+                          {user.name.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                            {user.name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ opacity: 0.6 }}>
+                            Joined {new Date(user.createdAt).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Container>
+          </Box>
+          
           {/* Features Section */}
           <Box
             sx={{

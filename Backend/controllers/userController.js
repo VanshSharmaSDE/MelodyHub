@@ -533,7 +533,7 @@ const deletePlaylist = async (req, res) => {
     }
 
     // Remove playlist from user
-    playlist.remove();
+    playlist.deleteOne();
 
     await user.save();
 

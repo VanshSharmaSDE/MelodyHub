@@ -405,6 +405,14 @@ function UserDashboard() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Format time for song duration display
+  const formatSongDuration = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Toggle like song
   const toggleLikeSong = async (song, event) => {
     if (event) {
@@ -417,7 +425,7 @@ function UserDashboard() {
       // Update liked songs
       if (res.data.liked) {
         setLikedSongs([...likedSongs, song]);
-        enqueueSnackbar('Added to your Liked Songs', { 
+        enqueueSnackbar('Added to your Liked Songs', {
           variant: 'success',
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
           TransitionComponent: Slide,
@@ -425,7 +433,7 @@ function UserDashboard() {
         });
       } else {
         setLikedSongs(likedSongs.filter(s => s._id !== song._id));
-        enqueueSnackbar('Removed from your Liked Songs', { 
+        enqueueSnackbar('Removed from your Liked Songs', {
           variant: 'info',
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
           TransitionComponent: Slide,
@@ -434,7 +442,7 @@ function UserDashboard() {
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      enqueueSnackbar('Failed to update Liked Songs', { 
+      enqueueSnackbar('Failed to update Liked Songs', {
         variant: 'error',
         anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
         TransitionComponent: Slide,
@@ -455,7 +463,7 @@ function UserDashboard() {
       // Update saved songs
       if (res.data.saved) {
         setSavedSongs([...savedSongs, song]);
-        enqueueSnackbar('Added to your Library', { 
+        enqueueSnackbar('Added to your Library', {
           variant: 'success',
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
           TransitionComponent: Slide,
@@ -463,7 +471,7 @@ function UserDashboard() {
         });
       } else {
         setSavedSongs(savedSongs.filter(s => s._id !== song._id));
-        enqueueSnackbar('Removed from your Library', { 
+        enqueueSnackbar('Removed from your Library', {
           variant: 'info',
           anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
           TransitionComponent: Slide,
@@ -472,7 +480,7 @@ function UserDashboard() {
       }
     } catch (error) {
       console.error('Error toggling save:', error);
-      enqueueSnackbar('Failed to update Library', { 
+      enqueueSnackbar('Failed to update Library', {
         variant: 'error',
         anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
         TransitionComponent: Slide,
@@ -481,19 +489,69 @@ function UserDashboard() {
     }
   };
 
-  // Download song
+  // Download song - improved version
   const downloadSong = async (song, event) => {
     if (event) {
       event.stopPropagation();
     }
 
     try {
-      // Direct download approach
-      window.open(`${api.defaults.baseURL}/user/songs/${song._id}/download`, '_blank');
-      enqueueSnackbar('Downloading song...', { variant: 'info' });
+      // Create a proper filename with melodyhub suffix
+      const cleanTitle = (song.title || 'unknown').replace(/[^\w\s]/gi, '').trim();
+      const cleanArtist = (song.artist || 'unknown').replace(/[^\w\s]/gi, '').trim();
+      const fileName = `${cleanTitle}_${cleanArtist}_melodyhub.mp3`;
+      
+      enqueueSnackbar('Downloading song...', { 
+        variant: 'info',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
+
+      // Create a function to handle the fetch and download
+      const downloadWithName = async () => {
+        // Fetch the file
+        const response = await fetch(`${api.defaults.baseURL}/user/songs/${song._id}/download`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!response.ok) throw new Error('Download failed');
+        
+        // Get the blob data
+        const blob = await response.blob();
+        
+        // Create a download link and click it
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      };
+      
+      await downloadWithName();
+      
+      enqueueSnackbar(`Successfully downloaded "${cleanTitle}"`, { 
+        variant: 'success',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
     } catch (error) {
       console.error('Error downloading song:', error);
-      enqueueSnackbar('Failed to download song', { variant: 'error' });
+      enqueueSnackbar('Failed to download song', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
     }
   };
 
@@ -605,6 +663,67 @@ function UserDashboard() {
     }
   };
 
+  // Remove song from playlist
+  const removeSongFromPlaylist = async (playlistId, songId) => {
+    try {
+      await api.delete(`/user/playlists/${playlistId}/songs/${songId}`);
+      
+      // Update the drawer playlist with the song removed
+      const updatedPlaylist = await api.get(`/user/playlists/${playlistId}`);
+      setDrawerPlaylist(updatedPlaylist.data.data);
+      
+      // Update the overall playlists state
+      const updatedPlaylists = await api.get('/user/playlists');
+      setPlaylists(updatedPlaylists.data.data);
+      
+      enqueueSnackbar('Song removed from playlist', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
+    } catch (error) {
+      console.error('Error removing song from playlist:', error);
+      enqueueSnackbar('Failed to remove song from playlist', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
+    }
+  };
+
+  // Delete playlist
+  const deletePlaylist = async (playlistId) => {
+    try {
+      await api.delete(`/user/playlists/${playlistId}`);
+      
+      // Update playlists state by removing the deleted playlist
+      setPlaylists(playlists.filter(p => p._id !== playlistId));
+      
+      // If the deleted playlist is currently open in the drawer, close it
+      if (drawerPlaylist && drawerPlaylist._id === playlistId) {
+        setPlaylistDrawerOpen(false);
+        setDrawerPlaylist(null);
+      }
+      
+      enqueueSnackbar('Playlist deleted successfully', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      enqueueSnackbar('Failed to delete playlist', { 
+        variant: 'error',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+        TransitionComponent: Slide,
+        TransitionProps: { direction: 'left' }
+      });
+    }
+  };
+
   // Shuffle array (Fisher-Yates algorithm)
   const shuffleArray = (array) => {
     const newArray = [...array];
@@ -693,9 +812,25 @@ function UserDashboard() {
             <Typography gutterBottom variant="h6" component="div" noWrap>
               {song.title || 'Unknown Title'}
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {song.artist || 'Unknown Artist'}
-            </Typography>
+            
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                noWrap 
+                sx={{ flex: 1, maxWidth: '70%' }}
+              >
+                {song.artist || 'Unknown Artist'}
+              </Typography>
+              
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ textAlign: 'right' }}
+              >
+                {formatSongDuration(song.duration)}
+              </Typography>
+            </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <IconButton size="small" onClick={(e) => toggleLikeSong(song, e)}>
@@ -722,14 +857,35 @@ function UserDashboard() {
   const renderPlaylistCard = (playlist) => {
     return (
       <Grid item xs={12} sm={6} md={4} lg={3} key={playlist._id}>
-        <SongCard onClick={() => openPlaylist(playlist._id)}>
-          <CardMedia
-            component="img"
-            height="160"
-            image={playlist.coverImage || '/default-playlist.jpg'}
-            alt={playlist.name}
-          />
-          <CardContent>
+        <SongCard>
+          <Box sx={{ position: 'relative' }}>
+            <CardMedia
+              component="img"
+              height="160"
+              image={playlist.coverImage || '/default-playlist.jpg'}
+              alt={playlist.name}
+              sx={{ cursor: 'pointer' }}
+              onClick={() => openPlaylist(playlist._id)}
+            />
+            <IconButton
+              sx={{
+                position: 'absolute',
+                bottom: 8,
+                right: 8,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
+              }}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent opening the playlist
+                if (window.confirm(`Are you sure you want to delete the playlist "${playlist.name}"?`)) {
+                  deletePlaylist(playlist._id);
+                }
+              }}
+            >
+              <Delete sx={{ color: '#ff5252' }} />
+            </IconButton>
+          </Box>
+          <CardContent sx={{ cursor: 'pointer' }} onClick={() => openPlaylist(playlist._id)}>
             <Typography gutterBottom variant="h6" component="div" noWrap>
               {playlist.name}
             </Typography>
@@ -748,7 +904,7 @@ function UserDashboard() {
       minHeight: '100vh',
       pb: 10, // Add padding for player
       marginBottom: '54px', // Adjust for fixed player height
-            '&::before': {
+      '&::before': {
         content: '""',
         position: 'absolute',
         top: 0,
@@ -836,7 +992,7 @@ function UserDashboard() {
                 </Box>
               </Grid>
               {/* <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}> */}
-                {/* <Button
+              {/* <Button
                   variant="outlined"
                   color="primary"
                   startIcon={<SettingsIcon />}
@@ -845,15 +1001,15 @@ function UserDashboard() {
                 >
                   Edit Profile
                 </Button> */}
-                <Button
-                  variant="text"
-                  color="error"
-                  startIcon={<LogoutIcon />}
-                  onClick={handleLogout}
-                  sx={{ mb: { xs: 1, md: 4 } }}
-                >
-                  Logout
-                </Button>
+              <Button
+                variant="text"
+                color="error"
+                startIcon={<LogoutIcon />}
+                onClick={handleLogout}
+                sx={{ mb: { xs: 1, md: 4 } }}
+              >
+                Logout
+              </Button>
               {/* </Grid> */}
             </Grid>
 
@@ -1313,21 +1469,33 @@ function UserDashboard() {
           {drawerPlaylist ? (
             // Playlist songs
             <>
-              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                <Box
-                  component="img"
-                  src={drawerPlaylist.coverImage || '/default-playlist.jpg'}
-                  alt={drawerPlaylist.name}
-                  sx={{ width: 60, height: 60, borderRadius: 1, mr: 2 }}
-                />
-                <Box>
-                  <Typography variant="subtitle1">
-                    {drawerPlaylist.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {drawerPlaylist.songs.length} songs
-                  </Typography>
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    component="img"
+                    src={drawerPlaylist.coverImage || '/default-playlist.jpg'}
+                    alt={drawerPlaylist.name}
+                    sx={{ width: 60, height: 60, borderRadius: 1, mr: 2 }}
+                  />
+                  <Box>
+                    <Typography variant="subtitle1">
+                      {drawerPlaylist.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {drawerPlaylist.songs.length} songs
+                    </Typography>
+                  </Box>
                 </Box>
+                <IconButton 
+                  color="error"
+                  onClick={() => {
+                    if (window.confirm(`Delete playlist "${drawerPlaylist.name}"?`)) {
+                      deletePlaylist(drawerPlaylist._id);
+                    }
+                  }}
+                >
+                  <Delete />
+                </IconButton>
               </Box>
 
               {drawerPlaylist.description && (
@@ -1347,47 +1515,66 @@ function UserDashboard() {
                   {drawerPlaylist.songs.map((song, index) => (
                     <ListItem
                       key={song._id}
-                      button
-                      onClick={() => playSong(song)}
                       sx={{
                         borderRadius: 1,
                         mb: 1,
                         backgroundColor: currentSong && currentSong._id === song._id ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
                         '&:hover': {
                           backgroundColor: currentSong && currentSong._id === song._id ? 'rgba(29, 185, 84, 0.2)' : 'rgba(255, 255, 255, 0.05)'
-                        }
+                        },
+                        display: 'flex',
+                        alignItems: 'center',
+                        pr: 1 // Add padding to the right
                       }}
                     >
-                      <ListItemIcon sx={{ minWidth: 40 }}>
-                        {currentSong && currentSong._id === song._id && isPlaying ? (
-                          <Pause sx={{ color: '#1DB954' }} />
-                        ) : (
-                          <Typography color={currentSong && currentSong._id === song._id ? '#1DB954' : 'inherit'}>
-                            {index + 1}
-                          </Typography>
-                        )}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={song.title}
-                        secondary={song.artist}
-                        primaryTypographyProps={{
-                          color: currentSong && currentSong._id === song._id ? '#1DB954' : 'inherit',
-                          noWrap: true
+                      <Box
+                        sx={{ 
+                          flexGrow: 1, 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          cursor: 'pointer'
                         }}
-                        secondaryTypographyProps={{
-                          noWrap: true
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {formatTime(song.duration)}
-                      </Typography>
+                        onClick={() => playSong(song)}
+                      >
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          {currentSong && currentSong._id === song._id && isPlaying ? (
+                            <Pause sx={{ color: '#1DB954' }} />
+                          ) : (
+                            <Typography color={currentSong && currentSong._id === song._id ? '#1DB954' : 'inherit'}>
+                              {index + 1}
+                            </Typography>
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={song.title}
+                          secondary={song.artist}
+                          primaryTypographyProps={{
+                            color: currentSong && currentSong._id === song._id ? '#1DB954' : 'inherit',
+                            noWrap: true
+                          }}
+                          secondaryTypographyProps={{
+                            noWrap: true
+                          }}
+                        />
+                        <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                          {formatTime(song.duration)}
+                        </Typography>
+                      </Box>
+                      <IconButton 
+                        size="small" 
+                        color="error"
+                        onClick={() => removeSongFromPlaylist(drawerPlaylist._id, song._id)}
+                        sx={{ ml: 1 }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
                     </ListItem>
                   ))}
                 </List>
               )}
             </>
           ) : (
-            // Current queue
+            // Current queue - this remains unchanged
             <>
               <Typography variant="subtitle1" sx={{ mb: 2 }}>
                 Now Playing

@@ -80,6 +80,11 @@ function AdminDashboard() {
   const [error, setError] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Add new state for user seeding
+  const [openSeedDialog, setOpenSeedDialog] = useState(false);
+  const [seedCount, setSeedCount] = useState(10);
+  const [seeding, setSeeding] = useState(false);
 
   const [songForm, setSongForm] = useState({
     title: '',
@@ -149,6 +154,22 @@ function AdminDashboard() {
       fetchSongs();
     } else if (newValue === 3 && playlists.length === 0) {
       fetchPlaylists();
+    }
+  };
+
+  // Add new function to seed users
+  const handleSeedUsers = async () => {
+    setSeeding(true);
+    try {
+      await api.post('/general/seed/users', { count: seedCount });
+      setOpenSeedDialog(false);
+      // Refresh users list after seeding
+      fetchUsers();
+      setSeeding(false);
+    } catch (err) {
+      console.error('Error seeding users:', err);
+      setError(err.response?.data?.message || 'Failed to seed users');
+      setSeeding(false);
     }
   };
 
@@ -533,6 +554,17 @@ function AdminDashboard() {
           </Typography>
           <Button
             color="inherit"
+            onClick={() => navigate('/')}
+            sx={{
+              borderRadius: 2,
+              mr: 2,
+              '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+            }}
+          >
+            Back to Home
+          </Button>
+          <Button
+            color="inherit"
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
             sx={{
@@ -582,9 +614,10 @@ function AdminDashboard() {
               <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<PersonIcon />} label="Users" iconPosition="start" sx={{ color: '#fff' }} />
               <Tab icon={<MusicIcon />} label="Songs" iconPosition="start" sx={{ color: '#fff' }} />
-              {/* <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} disabled />
-              <Tab icon={<PlaylistIcon />} label="Artist" iconPosition="start" sx={{ color: '#fff' }} disabled/>
-              <Tab icon={<PlaylistIcon />} label="Payments" iconPosition="start" sx={{ color: '#fff' }} disabled/>
+              <Tab icon={<PlaylistIcon />} label="Playlists" iconPosition="start" sx={{ color: '#fff' }} />
+              {/* Uncomment one of the tabs */}
+              <Tab icon={<PersonIcon />} label="Seed Data" iconPosition="start" sx={{ color: '#fff' }} />
+              {/* <Tab icon={<PlaylistIcon />} label="Payments" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="Storage" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="UI" iconPosition="start" sx={{ color: '#fff' }} disabled/>
               <Tab icon={<PlaylistIcon />} label="Feedback" iconPosition="start" sx={{ color: '#fff' }} disabled/> */}
@@ -692,6 +725,15 @@ function AdminDashboard() {
                         Manage Users
                       </Typography>
                     </Box>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<AddIcon />}
+                      onClick={() => setOpenSeedDialog(true)}
+                      sx={{ borderRadius: 2, px: 3, py: 1 }}
+                    >
+                      Seed Users
+                    </Button>
                   </Box>
 
                   <TableContainer sx={{ borderRadius: 1, overflow: 'hidden' }}>
@@ -989,6 +1031,50 @@ function AdminDashboard() {
                       ))}
                     </Grid>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Seed Data Tab */}
+            {activeTab === 4 && (
+              <Card sx={{ backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar sx={{ bgcolor: 'rgba(29, 185, 84, 0.2)', mr: 2 }}>
+                        <PersonIcon sx={{ color: '#1DB954' }} />
+                      </Avatar>
+                      <Typography variant="h6" sx={{ color: '#1DB954' }}>
+                        Seed Test Data
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <Card sx={{ backgroundColor: '#252525', height: '100%', p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <PersonIcon sx={{ color: '#1DB954', fontSize: 36, mr: 2 }} />
+                          <Typography variant="h6">Seed Users</Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ mb: 3, color: '#b3b3b3' }}>
+                          Generate random test users with default passwords. Useful for testing user management features.
+                        </Typography>
+                        <Button 
+                          fullWidth 
+                          variant="contained" 
+                          color="primary"
+                          onClick={() => setOpenSeedDialog(true)}
+                          startIcon={<AddIcon />}
+                          sx={{ mt: 'auto' }}
+                        >
+                          Seed Users
+                        </Button>
+                      </Card>
+                    </Grid>
+                    
+                    {/* You can add more seed options here in the future */}
+                  </Grid>
                 </CardContent>
               </Card>
             )}
@@ -1339,8 +1425,7 @@ function AdminDashboard() {
               >
                 {uploadProgress < 100
                   ? 'Please wait while your file is being uploaded to the cloud. This may take a moment depending on file size.'
-                  : 'Upload complete! Processing...'
-                }
+                  : 'Upload complete! Processing...'}
               </Typography>
             </Box>
           )}
@@ -1630,7 +1715,7 @@ function AdminDashboard() {
                       width: '8px'
                     },
                     '&::-webkit-scrollbar-track': {
-                      background: 'rgba(0,0,0,0.1)'
+                      background: 'rgba(0, 0, 0, 0.1)'
                     },
                     '&::-webkit-scrollbar-thumb': {
                       background: '#333'
@@ -1745,8 +1830,7 @@ function AdminDashboard() {
               >
                 {uploadProgress < 100
                   ? 'Please wait while your file is being uploaded to the cloud. This may take a moment depending on file size.'
-                  : 'Upload complete! Processing...'
-                }
+                  : 'Upload complete! Processing...'}
               </Typography>
             </Box>
           )}
@@ -1944,6 +2028,97 @@ function AdminDashboard() {
               Confirm Selection
             </Button>
           </Box>
+        </DialogActions>
+      </Dialog>
+
+      {/* Seed Users Dialog */}
+      <Dialog
+        open={openSeedDialog}
+        onClose={() => !seeding && setOpenSeedDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1e1e1e',
+            color: '#fff',
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          bgcolor: 'rgba(244, 67, 54, 0.1)',
+          color: '#f44336',
+          fontSize: '1.5rem',
+          pb: 2,
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <PersonIcon sx={{ mr: 1 }} />
+          Seed Test Users
+        </DialogTitle>
+
+        <DialogContent sx={{ py: 3 }}>
+          <Box sx={{ bgcolor: 'rgba(244, 67, 54, 0.05)', p: 2, borderRadius: 1, mb: 3, border: '1px solid rgba(244, 67, 54, 0.2)' }}>
+            <Typography variant="subtitle1" color="#f44336" fontWeight="bold" gutterBottom>
+              Warning: This is a development feature
+            </Typography>
+            <Typography variant="body2" color="#b3b3b3">
+              This will create test users in your database. These users will have default passwords and should only be used for testing purposes.
+              Do not use this feature in a production environment.
+            </Typography>
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Number of Users to Create"
+            type="number"
+            value={seedCount}
+            onChange={(e) => setSeedCount(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+            variant="outlined"
+            disabled={seeding}
+            InputProps={{
+              inputProps: { min: 1, max: 100 },
+              sx: { color: '#fff' }
+            }}
+            InputLabelProps={{ sx: { color: '#b3b3b3' } }}
+            helperText="Maximum 100 users at once"
+            FormHelperTextProps={{ sx: { color: '#b3b3b3' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#333' },
+                '&:hover fieldset': { borderColor: '#444' },
+                '&.Mui-focused fieldset': { borderColor: '#f44336' }
+              }
+            }}
+          />
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            onClick={() => setOpenSeedDialog(false)}
+            variant="text"
+            disabled={seeding}
+            sx={{
+              color: '#b3b3b3',
+              '&:hover': {
+                color: '#fff',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSeedUsers}
+            variant="contained"
+            color="error"
+            disabled={seeding}
+            sx={{ px: 3, borderRadius: 2 }}
+            startIcon={seeding && <CircularProgress size={16} color="inherit" />}
+          >
+            {seeding ? 'Creating Users...' : 'Create Test Users'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

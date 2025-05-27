@@ -55,10 +55,24 @@ function FeedbackForm() {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [formErrors, setFormErrors] = useState({});
   const [focused, setFocused] = useState({});
+  const [userName, setUserName] = useState('Anonymous User'); // Add state for user name
   
-  // Add current date/time when component mounts
+  // Add current date/time and get user name when component mounts
   useEffect(() => {
     updateCurrentDate();
+    
+    // Get user name from localStorage
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user && user.name) {
+          setUserName(user.name);
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing user data from localStorage:', error);
+    }
   }, []);
 
   // Update the date field
@@ -222,7 +236,7 @@ function FeedbackForm() {
         usabilityText: formData.usabilityText || getUsabilityText(formData.usability),
         recommendText: formData.recommendText || getRecommendText(formData.recommend),
         date: formData.date || new Date().toISOString().slice(0, 19).replace('T', ' '),
-        user: 'VanshSharmaSDEimport' // Adding user's login
+        user: userName, // Use the dynamically retrieved user name
       };
       
       // Add each field to the form
@@ -517,7 +531,7 @@ function FeedbackForm() {
                   <input type="hidden" name="ratingText" value={formData.ratingText} />
                   <input type="hidden" name="usabilityText" value={formData.usabilityText} />
                   <input type="hidden" name="recommendText" value={formData.recommendText} />
-                  <input type="hidden" name="user" value="VanshSharmaSDEimport" />
+                  <input type="hidden" name="user" value={userName} />
                 
                   <Box sx={{ mb: 5 }}>
                     <Typography variant="h5" fontWeight="600" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
@@ -864,7 +878,7 @@ function FeedbackForm() {
                         color: 'rgba(255,255,255,0.6)',
                         '&:hover': {
                           backgroundColor: 'rgba(255,255,255,0.05)',
-                          color: 'rgba(255,255,255,0.8)'
+                          color: '#1DB954'
                         }
                       }}
                     >
@@ -872,15 +886,13 @@ function FeedbackForm() {
                     </Button>
                   </Box>
                   
-                  <Box 
-                    sx={{ 
-                      mt: 4,
-                      p: 2,
-                      borderRadius: 1,
-                      bgcolor: 'rgba(0,0,0,0.2)',
-                      border: '1px solid rgba(255,255,255,0.05)'
-                    }}
-                  >
+                  <Box sx={{ 
+                    mt: 4,
+                    p: 2,
+                    borderRadius: 1,
+                    bgcolor: 'rgba(0,0,0,0.2)',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                  }}>
                     <Typography variant="caption" color="rgba(255,255,255,0.5)">
                       By submitting this feedback, you agree that we may use your comments to improve our service. 
                       We value your privacy and will not share your personal information with third parties.
