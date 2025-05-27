@@ -1,7 +1,7 @@
 # 🎵 MelodyHub
 
 <div align="center">
-  <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748326523/1747249849835_1747249849548_1747249848706_1747249847850_1747249846083_1747249845185_1747249840266_1747249836747_1747249835944_1747249835166_1747249834289_1747249833109_1747249831064_Untitled6_20250515003921_t9ovm0.png" alt="MelodyHub Logo" width="200"/>
+  <img src="https://res.cloudinary.com/dauh5uusc/image/upload/v1748326648/1747249849835_1747249849548_1747249848706_1747249847850_1747249846083_1747249845185_1747249840266_1747249836747_1747249835944_1747249835166_1747249834289_1747249833109_1747249831064_Untitled6_20250515003921_mjqbuo.png" alt="MelodyHub Logo" width="200"/>
   <h3>Your Ultimate Music Streaming Experience</h3>
   <p>Discover, Stream, and Share Music Like Never Before</p>
   
@@ -212,8 +212,8 @@ MelodyHub is licensed under the [MIT License](LICENSE) - see the LICENSE file fo
 ---
 
 <div align="center">
-    <a href="https://melodyhub-v1-0-0.onrender.com/terms">Terms of Service</a> • 
-    <a href="https://melodyhub-v1-0-0.onrender.com/privacy">Privacy Policy</a>
+    <a href="https://melodyhub-v1-0-0.onrender.com/terms-of-service">Terms of Service</a> • 
+    <a href="https://melodyhub-v1-0-0.onrender.com/privacy-policy">Privacy Policy</a>
   </p>
   <p>© 2025 MelodyHub. All rights reserved.</p>
 </div>
