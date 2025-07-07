@@ -885,7 +885,6 @@ module.exports = {
   updateSong,
   deleteSong,
   getDashboardStats,
-  // Add playlist management functions
   getAllPlaylists,
   getPlaylistById,
   createPlaylist,

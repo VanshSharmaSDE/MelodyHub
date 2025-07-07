@@ -253,7 +253,7 @@ function Footer() {
                       {[
                         { name: 'Home', path: '/' },
                         { name: 'Discover', path: '/discover' },
-                        { name: 'Premium', path: '/pricing' },
+                        // { name: 'Premium', path: '/pricing' },
                         { name: 'Feedback', path: '/feedback' },
                       ].map((item) => (
                         <Box
@@ -407,8 +407,8 @@ function Footer() {
               }}
             >
               {[
-                { name: 'Privacy Policy', path: '/privacy-policy' },
-                { name: 'Terms of Use', path: '/terms-of-service' },
+                // { name: 'Privacy Policy', path: '/privacy-policy' },
+                // { name: 'Terms of Use', path: '/terms-of-service' },
               ].map((item) => (
                 <Link
                   key={item.name}

@@ -233,7 +233,7 @@ const HomePage = () => {
                 Music for Everyone
               </Typography>
               <Typography variant="h5" sx={{ mb: 4, opacity: 0.8 }}>
-                Millions of songs. No credit card needed.
+                Hundred of songs. No credit card needed.
               </Typography>
               <Button
                 variant="contained"

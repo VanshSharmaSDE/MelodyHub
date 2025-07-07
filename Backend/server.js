@@ -23,7 +23,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://melodyhub-v1-0-0.onrender.com/',
+  origin: 'http://localhost:5177',
   credentials: true
 }));
 

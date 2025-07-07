@@ -233,9 +233,7 @@ We're committed to continuously enhancing MelodyHub. Here's what's on our develo
 
 MelodyHub is proudly developed and maintained by a passionate team led by:
 
-- **[ Aishwarya ](https://github.com/Anuj-prajapati-SDE)** - Team Leader & Content Manager
-- **[ Kalpana ](https://github.com/Anuj-prajapati-SDE)** - Frontend Develper
-- **[ Princy ](https://github.com/Anuj-prajapati-SDE)** - Backend Developer & Deployment
+- **[ Vansh Vyas ](https://github.com/VanshSharmaSDE)** - Owner and Developer
 
 Our team combines expertise in music, user experience design, and cutting-edge web technologies to create the best possible platform for music lovers.
 
