@@ -49,7 +49,7 @@ app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 }, // Limit file size to 50MB for audio files
 }));
 
-const url = process.env.BACKEND_URL; // Replace with your Render URL
+const url = "https://melodyhub-qnq7.onrender.com"; // Replace with your Render URL
 const interval = 600000; // Interval in milliseconds (10 minutes)
 
 //Pinging server
